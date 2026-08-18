@@ -1,0 +1,58 @@
+# 云帆志愿 · 本地端到端联调（架构任务 T2）
+#
+# 用法：
+#   docker compose up -d                              # 启动 PostgreSQL + 后端
+#   docker compose exec backend npm run db:seed       # 写入种子数据（幂等）
+#   curl -fsS http://localhost:3001/api/v1/health     # 健康检查
+#   curl -fsS http://localhost:3001/api/v1/reference-data | head
+#
+# 停止：
+#   docker compose down          # 保留数据卷 pgdata
+#   docker compose down -v       # 连同数据卷一起删除（清空数据库）
+#
+# 说明：
+#   - db 首次初始化（pgdata 为空时）会自动执行挂载的 schema.sql / auth-schema.sql。
+#   - 后端镜像由 ./server/Dockerfile 构建，启动命令取其 CMD（npx tsx src/index.ts）。
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: yunfan
+      POSTGRES_PASSWORD: yunfan
+      POSTGRES_DB: yunfan
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # 首次初始化（pgdata 为空）自动建表；可重复运行且幂等
+      - ./server/src/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./server/src/db/auth-schema.sql:/docker-entrypoint-initdb.d/02-auth-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yunfan -d yunfan"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./server
+    environment:
+      NODE_ENV: production
+      DATA_SOURCE: postgres
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: yunfan
+      PGPASSWORD: yunfan
+      PGDATABASE: yunfan
+      PORT: 3001
+      # 本地前端联调地址（生产请在控制台改为静态站域名）
+      CORS_ORIGIN: "http://localhost:5173"
+      USE_LLM: "false"
+    ports:
+      - "3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云帆志愿 · 设计规范与线框图</title>
+<style>
+  :root{
+    /* ===== 主色：旭日东升 ===== */
+    --sun-coral:#FF6B5C;      /* 朝霞 */
+    --sun-orange:#FF9F43;     /* 活力橙（主色） */
+    --sun-amber:#FFC93C;      /* 阳光金 */
+    --sky-blue:#4DA3FF;       /* 晴空蓝 */
+    --sky-deep:#2E86DE;       /* 深空蓝 */
+    --sprout:#2ED47A;         /* 新芽绿（成长） */
+    --bloom:#1AB6C4;          /* 深海青（根基） */
+    --ink:#1F2A44;            /* 主文字 */
+    --ink-soft:#5B6B85;       /* 次文字 */
+    --ink-faint:#9AA7BD;      /* 弱文字 */
+    --paper:#FFF8F0;          /* 暖纸白 */
+    --paper-cool:#F1F7FF;     /* 冷调浅蓝 */
+    --card:#FFFFFF;
+    --line:#EEF1F6;
+    --sun-grad:linear-gradient(135deg,#FFC93C 0%,#FF9F43 38%,#FF6B5C 70%,#4DA3FF 100%);
+    --sun-grad-soft:linear-gradient(135deg,#FFE9C7 0%,#FFD9B0 50%,#CDE8FF 100%);
+    --shadow-sm:0 4px 14px rgba(255,140,60,.10);
+    --shadow-md:0 10px 30px rgba(255,140,60,.14);
+    --radius:20px;
+    --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);color:var(--ink);background:var(--paper);line-height:1.6;
+       -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px 100px;}
+  /* hero */
+  .hero{background:var(--sun-grad);color:#fff;padding:72px 28px 96px;position:relative;overflow:hidden;}
+  .hero::after{content:"";position:absolute;right:-80px;top:-80px;width:320px;height:320px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.35),transparent 70%);}
+  .hero-inner{max-width:1120px;margin:0 auto;}
+  .hero h1{font-size:42px;font-weight:800;letter-spacing:.5px;}
+  .hero .sub{font-size:18px;margin-top:14px;opacity:.95;max-width:640px;}
+  .hero .tag{display:inline-block;margin-top:22px;background:rgba(255,255,255,.2);backdrop-filter:blur(6px);
+    padding:8px 18px;border-radius:999px;font-size:14px;font-weight:600;}
+  /* sections */
+  section{padding:64px 0;border-bottom:1px solid var(--line);}
+  h2{font-size:28px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+  h2 .em{width:8px;height:30px;border-radius:6px;background:var(--sun-grad);}
+  .lead{color:var(--ink-soft);margin-bottom:34px;max-width:760px;}
+  /* color grid */
+  .swatch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px;}
+  .swatch{border-radius:16px;overflow:hidden;background:var(--card);box-shadow:var(--shadow-sm);}
+  .swatch .chip{height:84px;}
+  .swatch .meta{padding:12px 14px;}
+  .swatch .meta .n{font-weight:700;font-size:14px;}
+  .swatch .meta .h{font-size:12px;color:var(--ink-faint);font-family:ui-monospace,monospace;}
+  .swatch .meta .u{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  /* tier colors */
+  .tier-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:10px;}
+  .tier{border-radius:16px;padding:22px 18px;color:#fff;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);}
+  .tier h3{font-size:20px;font-weight:800;margin-bottom:4px;}
+  .tier p{font-size:13px;opacity:.95;}
+  .tier .pct{font-size:30px;font-weight:800;margin-top:14px;}
+  /* type */
+  .type-row{display:flex;gap:30px;flex-wrap:wrap;align-items:flex-end;}
+  .type-sample{font-weight:800;line-height:1.2;}
+  .scale{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:14px;margin-top:20px;}
+  .scale .s{background:var(--card);border-radius:14px;padding:16px;box-shadow:var(--shadow-sm);}
+  .scale .s .big{font-weight:800;color:var(--ink);}
+  .scale .s .lab{font-size:12px;color:var(--ink-faint);}
+  .scale .s .px{font-size:11px;color:var(--sun-orange);font-weight:700;}
+  /* spacing */
+  .space-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;}
+  .space-box{background:var(--sun-grad);border-radius:6px;}
+  .space-lab{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:6px;}
+  /* components */
+  .comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px;}
+  .comp{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-sm);}
+  .comp h4{font-size:14px;color:var(--ink-soft);font-weight:700;margin-bottom:16px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;border:none;
+    cursor:pointer;border-radius:14px;padding:14px 22px;font-size:15px;font-family:inherit;}
+  .btn-primary{background:linear-gradient(135deg,#FF9F43,#FF6B5C);color:#fff;box-shadow:0 8px 20px rgba(255,107,92,.3);}
+  .btn-ghost{background:#FFF1E6;color:#FF7A2F;}
+  .btn-line{background:#fff;color:var(--ink);border:1.5px solid var(--line);}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;}
+  .chip-on{background:linear-gradient(135deg,#FF9F43,#FF6B5C);color:#fff;}
+  .chip-off{background:#F2F4F8;color:var(--ink-soft);}
+  .pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+  .pill-orange{background:#FFF1E6;color:#FF7A2F;}
+  .pill-blue{background:#E8F2FF;color:var(--sky-deep);}
+  .pill-green{background:#E6F9EF;color:#16A34A;}
+  .pill-cyan{background:#E2F7F9;color:#0E8E99;}
+  .progress{height:8px;border-radius:999px;background:#EEF1F6;overflow:hidden;}
+  .progress > i{display:block;height:100%;width:60%;background:var(--sun-grad);border-radius:999px;}
+  .banner{border-radius:16px;padding:16px 18px;font-size:14px;font-weight:600;display:flex;gap:10px;align-items:flex-start;}
+  .banner-warn{background:#FFF7E6;border:1px solid #FFE2A8;color:#B26A00;}
+  .banner-info{background:#EAF4FF;border:1px solid #C7E2FF;color:var(--sky-deep);}
+  .slider-ui{height:8px;border-radius:999px;background:#EEF1F6;position:relative;}
+  .slider-ui > i{position:absolute;inset:0 40% 0 0;background:var(--sun-grad);border-radius:999px;}
+  .slider-ui > b{position:absolute;top:-6px;left:60%;width:20px;height:20px;border-radius:50%;background:#fff;
+    border:3px solid var(--sun-orange);box-shadow:0 2px 6px rgba(0,0,0,.12);}
+  /* wireframe device */
+  .wf-section{padding-top:0;}
+  .wf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:28px;margin-top:10px;}
+  .phone{border:2px solid #E2E6EE;border-radius:34px;background:#fff;padding:12px;box-shadow:var(--shadow-md);position:relative;}
+  .phone .screen{background:#FAFBFE;border-radius:24px;overflow:hidden;border:1px solid #EDF0F5;}
+  .phone .notch{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:120px;height:22px;background:#1F2A44;border-radius:0 0 14px 14px;z-index:5;}
+  .wf-cap{margin-top:14px;font-weight:700;font-size:14px;}
+  .wf-cap span{display:block;font-weight:500;color:var(--ink-faint);font-size:12px;margin-top:2px;}
+  /* wireframe internals (low-fi) */
+  .wf{font-family:ui-monospace,"SF Mono",monospace;color:#7A8699;font-size:11px;}
+  .wf .bar{background:#E6EAF1;border-radius:6px;}
+  .wf .blk{background:#EDF0F5;border-radius:8px;border:1px dashed #C9D2E0;}
+  .wf .blk.dark{background:#E0E5EE;}
+  .wf .line{height:7px;border-radius:4px;background:#E6EAF1;margin:5px 0;}
+  .wf .line.s{width:55%;} .wf .line.m{width:75%;} .wf .line.l{width:92%;}
+  .wf .dot{width:34px;height:34px;border-radius:50%;background:#E6EAF1;}
+  .wf .chipx{display:inline-block;padding:5px 12px;border-radius:999px;background:#EDF0F5;border:1px solid #D8DEE8;font-size:10px;}
+  .wf .btnx{height:38px;border-radius:12px;background:#E6EAF1;display:flex;align-items:center;justify-content:center;font-weight:700;color:#9AA7BD;}
+  .wf .btnx.fill{background:#D7DEEA;color:#7A8699;}
+  .wf-head{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid #EDF0F5;}
+  .wf-body{padding:14px 16px;min-height:540px;}
+  .wf .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .wf .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .wf .row{display:flex;gap:8px;align-items:center;margin:10px 0;}
+  .wf .tier-tag{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:13px;color:var(--ink-soft);}
+  .legend i{display:inline-block;width:14px;height:14px;border-radius:4px;margin-right:6px;vertical-align:-2px;}
+  footer{text-align:center;color:var(--ink-faint);font-size:13px;padding:40px 0 10px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="tag">🌅 设计系统 · 线框图 · 交互说明</div>
+    <h1>云帆志愿 · 设计规范</h1>
+    <p class="sub">"乘风破浪会有时，直挂云帆济沧海。" 以「旭日东升」为设计母题——暖橙朝霞过渡到晴空蓝，象征从当下的努力走向广阔的未来，蓬勃、向上、充满展望。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 1. 设计理念 -->
+  <section>
+    <h2><span class="em"></span>一、设计理念：旭日东升</h2>
+    <p class="lead">高考志愿填报是一场关于「未来」的决策。我们希望产品在视觉上传递<b>阳光、朝气、可控的安心感</b>，而非焦虑与压力。三条设计支柱：</p>
+    <div class="comp-grid">
+      <div class="comp">
+        <h4>🌅 阳光有生气</h4>
+        <p style="color:var(--ink-soft);font-size:14px">主色取朝霞橙红→活力橙，配合阳光金高光，界面明亮通透，杜绝沉重的深灰蓝调。</p>
+      </div>
+      <div class="comp">
+        <h4>🚀 蓬勃向上</h4>
+        <p style="color:var(--ink-soft);font-size:14px">信息结构由「低→高」递进（采集→意向→推荐），视觉动线如旭日上升；推荐梯度以「冲稳保垫」四级托底。</p>
+      </div>
+      <div class="comp">
+        <h4>🌊 展望与安心</h4>
+        <p style="color:var(--ink-soft);font-size:14px">晴空蓝代表未来与理性，新芽绿代表成长与希望。反焦虑设计：实时预览、置信度透明、降级可回溯。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 色彩 -->
+  <section>
+    <h2><span class="em"></span>二、色彩系统</h2>
+    <p class="lead">以「旭日东升」渐变（阳光金 → 活力橙 → 朝霞红 → 晴空蓝）为主视觉语言；功能色承担语义，四级推荐梯度各有专属色，互不混淆。</p>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="chip" style="background:var(--sun-coral)"></div><div class="meta"><div class="n">朝霞红 Sun-Coral</div><div class="h">#FF6B5C</div><div class="u">强调 / 冲梯度</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sun-orange)"></div><div class="meta"><div class="n">活力橙 Sun-Orange</div><div class="h">#FF9F43</div><div class="u">主色 / 主按钮</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sun-amber)"></div><div class="meta"><div class="n">阳光金 Sun-Amber</div><div class="h">#FFC93C</div><div class="u">高光 / 能量点缀</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sky-blue)"></div><div class="meta"><div class="n">晴空蓝 Sky-Blue</div><div class="h">#4DA3FF</div><div class="u">未来 / 稳梯度</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--sprout)"></div><div class="meta"><div class="n">新芽绿 Sprout</div><div class="h">#2ED47A</div><div class="u">成长 / 保梯度</div></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--bloom)"></div><div class="meta"><div class="n">深海青 Bloom</div><div class="h">#1AB6C4</div><div class="u">根基 / 垫梯度</div></div></div>
+    </div>
+
+    <h3 style="margin:40px 0 6px;font-size:18px">冲稳保垫 · 四级推荐梯度色板</h3>
+    <p class="lead" style="margin-bottom:10px">每一级对应一个温度与情绪：冲=敢想（暖）、稳=稳健（蓝）、保=安心（绿）、垫=托底（青）。颜色即语义，降低认知负担。</p>
+    <div class="tier-row">
+      <div class="tier" style="background:linear-gradient(135deg,#FF8A6B,#FF6B5C)"><h3>冲 · Reach</h3><p>跳一跳够得着 · 30–60%</p><div class="pct">30%↑</div></div>
+      <div class="tier" style="background:linear-gradient(135deg,#6DB4FF,#4DA3FF)"><h3>稳 · Match</h3><p>大概率稳 · 60–85%</p><div class="pct">60%↑</div></div>
+      <div class="tier" style="background:linear-gradient(135deg,#4FE0A0,#2ED47A)"><h3>保 · Safe</h3><p>较安全 · 85–95%</p><div class="pct">85%↑</div></div>
+      <div class="tier" style="background:linear-gradient(135deg,#2ECBD8,#1AB6C4)"><h3>垫 · Cushion</h3><p>绝对兜底 · &gt;95%</p><div class="pct">95%↑</div></div>
+    </div>
+  </section>
+
+  <!-- 3. 字体 -->
+  <section>
+    <h2><span class="em"></span>三、字体与层级</h2>
+    <p class="lead">中文优先 PingFang SC / 微软雅黑；数字与概率使用等宽字体增强「数据可信感」。字号遵循 8pt 节奏。</p>
+    <div class="type-row">
+      <div><div class="type-sample" style="font-size:34px">标题 H1</div><div style="color:var(--ink-faint);font-size:13px">34px / 800</div></div>
+      <div><div class="type-sample" style="font-size:24px">标题 H2</div><div style="color:var(--ink-faint);font-size:13px">24px / 800</div></div>
+      <div><div class="type-sample" style="font-size:18px">正文 Large</div><div style="color:var(--ink-faint);font-size:13px">18px / 600</div></div>
+      <div><div class="type-sample" style="font-size:15px">正文 Body</div><div style="color:var(--ink-faint);font-size:13px">15px / 400</div></div>
+      <div><div class="type-sample" style="font-size:13px">辅助 Caption</div><div style="color:var(--ink-faint);font-size:13px">13px / 500</div></div>
+    </div>
+    <div class="scale">
+      <div class="s"><div class="big">A</div><div class="lab">Display</div><div class="px">36px</div></div>
+      <div class="s"><div class="big">A</div><div class="lab">H1</div><div class="px">30px</div></div>
+      <div class="s"><div class="big">A</div><div class="lab">H2</div><div class="px">24px</div></div>
+      <div class="s"><div class="big">A</div><div class="lab">H3</div><div class="px">20px</div></div>
+      <div class="s"><div class="big">A</div><div class="lab">Body+</div><div class="px">18px</div></div>
+      <div class="s"><div class="big">A</div><div class="lab">Body</div><div class="px">16px</div></div>
+      <div class="s"><div class="big">A</div><div class="lab">Caption</div><div class="px">14px</div></div>
+      <div class="s"><div class="big">A</div><div class="lab">Mini</div><div class="px">12px</div></div>
+    </div>
+  </section>
+
+  <!-- 4. 间距 -->
+  <section>
+    <h2><span class="em"></span>四、间距与栅格（8pt）</h2>
+    <p class="lead">以 8px 为基准单位的间距体系，营造规律、呼吸感强的节奏。移动端内容左右留白 20px。</p>
+    <div class="space-row">
+      <div><div class="space-box" style="width:8px;height:40px"></div><div class="space-lab">4</div></div>
+      <div><div class="space-box" style="width:16px;height:40px"></div><div class="space-lab">8</div></div>
+      <div><div class="space-box" style="width:24px;height:40px"></div><div class="space-lab">12</div></div>
+      <div><div class="space-box" style="width:32px;height:40px"></div><div class="space-lab">16</div></div>
+      <div><div class="space-box" style="width:48px;height:40px"></div><div class="space-lab">24</div></div>
+      <div><div class="space-box" style="width:64px;height:40px"></div><div class="space-lab">32</div></div>
+      <div><div class="space-box" style="width:96px;height:40px"></div><div class="space-lab">48</div></div>
+    </div>
+  </section>
+
+  <!-- 5. 组件 -->
+  <section>
+    <h2><span class="em"></span>五、核心组件库</h2>
+    <p class="lead">所有组件圆角 ≥ 14px、阴影柔和、状态清晰；关键拦截提示不依赖纯颜色（配图标+文字，满足 WCAG AA）。</p>
+    <div class="comp-grid">
+      <div class="comp"><h4>按钮 Buttons</h4>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary">开始填报</button>
+          <button class="btn btn-ghost">上一步</button>
+          <button class="btn btn-line">跳过</button>
+        </div>
+      </div>
+      <div class="comp"><h4>选择标签 Chips</h4>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="chip chip-on">985 ✓</span>
+          <span class="chip chip-off">211</span>
+          <span class="chip chip-off">双一流</span>
+        </div>
+      </div>
+      <div class="comp"><h4>语义徽标 Pills</h4>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="pill pill-orange">预测数据</span>
+          <span class="pill pill-blue">置信度 0.6</span>
+          <span class="pill pill-green">保底 100%</span>
+          <span class="pill pill-cyan">新专业</span>
+        </div>
+      </div>
+      <div class="comp"><h4>进度条 Progress</h4>
+        <div class="progress"><i></i></div>
+        <p style="font-size:12px;color:var(--ink-faint);margin-top:8px">向导第 3 / 7 步</p>
+      </div>
+      <div class="comp"><h4>提示横幅 Banners</h4>
+        <div class="banner banner-warn" style="margin-bottom:10px">⚠️ 已为你放宽：取消最低院校层次限制</div>
+        <div class="banner banner-info">ℹ️ 位次由总分自动反查，可手动核对</div>
+      </div>
+      <div class="comp"><h4>权重滑块 Slider</h4>
+        <div class="slider-ui"><i></i><b></b></div>
+        <p style="font-size:12px;color:var(--ink-faint);margin-top:14px">保专业 50 · 保学校 30 · 冲城市 20</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 线框图 -->
+  <section class="wf-section">
+    <h2><span class="em"></span>六、低保真线框图（9 张核心屏）</h2>
+    <p class="lead">以下为布局与信息层级的灰度高保真线框，含关键交互标注。右侧高保真可交互原型见 <b>prototype.html</b>。</p>
+    <div class="legend">
+      <span><i style="background:#E6EAF1"></i>占位区块</span>
+      <span><i style="background:#EDF0F5;border:1px dashed #C9D2E0"></i>可输入/可点区域</span>
+      <span><i style="background:#D7DEEA"></i>主行动按钮</span>
+    </div>
+
+    <div class="wf-grid">
+
+      <!-- 首页 -->
+      <div class="phone"><div class="notch"></div>
+        <div class="screen wf">
+          <div class="wf-head"><div class="bar" style="width:90px;height:14px"></div></div>
+          <div class="wf-body">
+            <div class="blk" style="height:150px;border-radius:18px;margin-bottom:14px"></div>
+            <div class="line l"></div><div class="line m"></div>
+            <div class="blk dark" style="height:54px;border-radius:14px;margin:14px 0;display:flex;align-items:center;justify-content:center">开始智能填报（主 CTA）</div>
+            <div class="grid3" style="margin:10px 0">
+              <div class="blk" style="height:60px"></div><div class="blk" style="height:60px"></div><div class="blk" style="height:60px"></div>
+            </div>
+            <div class="line l"></div><div class="line s"></div>
+            <div class="blk" style="height:90px;margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-cap">01 · 首页 / 启动<span>旭日渐变 Hero + 主 CTA；底部 Tab：首页/填报/志愿表/我的</span></div>
+
+      <!-- Wiz1 -->
+      <div class="phone"><div class="notch"></div>
+        <div class="screen wf">
+          <div class="wf-head"><div class="dot" style="width:20px;height:20px;border-radius:6px"></div><div class="bar" style="width:120px;height:12px"></div></div>
+          <div class="wf-body">
+            <div class="progress" style="height:6px;margin-bottom:16px"><i style="width:14%"></i></div>
+            <div class="line l"></div><div class="line m"></div>
+            <div class="blk" style="height:48px;margin:14px 0"></div>
+            <div class="line s"></div>
+            <div class="blk" style="height:48px;margin:10px 0"></div>
+            <div class="row"><div class="dot"></div><div class="blk dark" style="flex:1;height:20px"></div></div>
+            <div class="row"><div class="dot"></div><div class="blk dark" style="flex:1;height:20px"></div></div>
+            <div class="btnx fill" style="margin-top:18px">下一步</div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-cap">02 · 向导 Step1 省份与模式<span>选省后自动推导高考模式；改模式二次确认</span></div>
+
+      <!-- Wiz2 -->
+      <div class="phone"><div class="notch"></div>
+        <div class="screen wf">
+          <div class="wf-head"><div class="bar" style="width:14px;height:14px;border-radius:4px"></div><div class="bar" style="width:120px;height:12px"></div></div>
+          <div class="wf-body">
+            <div class="progress" style="height:6px;margin-bottom:16px"><i style="width:28%"></i></div>
+            <div class="line l"></div>
+            <div class="blk" style="height:54px;margin:12px 0"></div>
+            <div class="blk dark" style="height:64px;border-radius:14px;margin:10px 0;display:flex;align-items:center;justify-content:center">位次自动反查结果</div>
+            <div class="banner banner-info" style="padding:10px;font-size:10px">ℹ 可手动核对/覆盖</div>
+            <div class="btnx fill" style="margin-top:18px">下一步</div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-cap">03 · 向导 Step2 成绩与位次<span>输入总分→系统自动反查省位次与一分一段区间</span></div>
+
+      <!-- Wiz3 -->
+      <div class="phone"><div class="notch"></div>
+        <div class="screen wf">
+          <div class="wf-head"><div class="bar" style="width:14px;height:14px;border-radius:4px"></div><div class="bar" style="width:120px;height:12px"></div></div>
+          <div class="wf-body">
+            <div class="progress" style="height:6px;margin-bottom:16px"><i style="width:42%"></i></div>
+            <div class="line l"></div>
+            <div class="grid3" style="margin:14px 0">
+              <div class="blk dark" style="height:46px;border-radius:10px"></div><div class="blk" style="height:46px;border-radius:10px"></div><div class="blk" style="height:46px;border-radius:10px"></div>
+            </div>
+            <div class="line s"></div>
+            <div class="grid2" style="margin-top:10px">
+              <div class="blk" style="height:46px;border-radius:10px"></div><div class="blk" style="height:46px;border-radius:10px"></div>
+              <div class="blk" style="height:46px;border-radius:10px"></div><div class="blk" style="height:46px;border-radius:10px"></div>
+            </div>
+            <div class="btnx fill" style="margin-top:18px">下一步</div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-cap">04 · 向导 Step3 选科<span>按高考模式动态生成合法组合；非法实时拦截</span></div>
+
+      <!-- Wiz4 -->
+      <div class="phone"><div class="notch"></div>
+        <div class="screen wf">
+          <div class="wf-head"><div class="bar" style="width:14px;height:14px;border-radius:4px"></div><div class="bar" style="width:120px;height:12px"></div></div>
+          <div class="wf-body">
+            <div class="progress" style="height:6px;margin-bottom:16px"><i style="width:56%"></i></div>
+            <div class="line l"></div>
+            <div class="grid2" style="margin:14px 0">
+              <div class="blk" style="height:44px;border-radius:10px"></div><div class="blk" style="height:44px;border-radius:10px"></div>
+              <div class="blk" style="height:44px;border-radius:10px"></div><div class="blk" style="height:44px;border-radius:10px"></div>
+            </div>
+            <div class="blk dark" style="height:40px;margin:10px 0;border-radius:10px"></div>
+            <div class="line s"></div>
+            <div class="btnx fill" style="margin-top:18px">下一步</div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-cap">05 · 向导 Step4 身份加分<span>默认"无"；勾选专项/艺体展开必填项（渐进披露）</span></div>
+
+      <!-- Wiz5 -->
+      <div class="phone"><div class="notch"></div>
+        <div class="screen wf">
+          <div class="wf-head"><div class="bar" style="width:14px;height:14px;border-radius:4px"></div><div class="bar" style="width:120px;height:12px"></div></div>
+          <div class="wf-body">
+            <div class="progress" style="height:6px;margin-bottom:16px"><i style="width:70%"></i></div>
+            <div class="line l"></div>
+            <div class="grid3" style="margin:14px 0">
+              <div class="blk dark" style="height:60px;border-radius:12px"></div><div class="blk dark" style="height:60px;border-radius:12px"></div><div class="blk dark" style="height:60px;border-radius:12px"></div>
+            </div>
+            <div class="line s"></div>
+            <div class="blk" style="height:40px;margin:10px 0;border-radius:10px"></div>
+            <div class="blk" style="height:40px;margin:10px 0;border-radius:10px"></div>
+            <div class="btnx fill" style="margin-top:14px">下一步</div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-cap">06 · 向导 Step5 喜好唤醒<span>热门大类卡片先行唤醒意向，再细化院校/地域/专业</span></div>
+
+      <!-- Wiz6 -->
+      <div class="phone"><div class="notch"></div>
+        <div class="screen wf">
+          <div class="wf-head"><div class="bar" style="width:14px;height:14px;border-radius:4px"></div><div class="bar" style="width:120px;height:12px"></div></div>
+          <div class="wf-body">
+            <div class="progress" style="height:6px;margin-bottom:16px"><i style="width:84%"></i></div>
+            <div class="line l"></div>
+            <div class="blk" style="height:18px;margin:14px 0"></div>
+            <div class="slider-ui" style="margin:18px 0"><i style="inset:0 40% 0 0"></i><b style="left:60%"></b></div>
+            <div class="blk" style="height:18px;margin:14px 0"></div>
+            <div class="slider-ui" style="margin:18px 0"><i style="inset:0 60% 0 0;background:#4DA3FF"></i><b style="left:40%;border-color:#4DA3FF"></b></div>
+            <div class="blk" style="height:18px;margin:14px 0"></div>
+            <div class="slider-ui" style="margin:18px 0"><i style="inset:0 80% 0 0;background:#2ED47A"></i><b style="left:20%;border-color:#2ED47A"></b></div>
+            <div class="btnx fill" style="margin-top:10px">生成我的志愿方案</div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-cap">07 · 向导 Step6 权重矩阵<span>三滑块联动归一 + 实时预览冲稳保垫分布</span></div>
+
+      <!-- Result -->
+      <div class="phone"><div class="notch"></div>
+        <div class="screen wf">
+          <div class="wf-head"><div class="bar" style="width:14px;height:14px;border-radius:4px"></div><div class="bar" style="width:130px;height:12px"></div></div>
+          <div class="wf-body">
+            <div class="banner banner-warn" style="padding:8px;font-size:9px;margin-bottom:10px">⚠ 已为你放宽：取消最低院校层次限制</div>
+            <div class="grid4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">
+              <div class="blk dark" style="height:46px;border-radius:10px"></div><div class="blk dark" style="height:46px;border-radius:10px"></div><div class="blk dark" style="height:46px;border-radius:10px"></div><div class="blk dark" style="height:46px;border-radius:10px"></div>
+            </div>
+            <div class="blk" style="height:88px;margin:10px 0;border-radius:14px"></div>
+            <div class="tier-tag" style="background:#FFE3DC;color:#C73E2A">冲 32%</div>
+            <div class="blk" style="height:70px;margin:8px 0 14px;border-radius:14px"></div>
+            <div class="btnx fill">加入志愿表</div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-cap">08 · 推荐结果页<span>冲稳保垫四栏 + 概率 + 置信度 + 降级横幅 + 志愿表</span></div>
+
+    </div>
+  </section>
+
+  <footer>
+    云帆志愿 · 设计规范与线框图 &nbsp;|&nbsp; 设计母题「旭日东升」&nbsp;|&nbsp; 配色与组件可直接用于 prototype.html 开发
+  </footer>
+</div>
+</body>
+</html>

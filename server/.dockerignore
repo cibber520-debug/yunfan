@@ -1,0 +1,21 @@
+# 依赖与构建产物（运行时由镜像重新安装/生成）
+node_modules
+dist
+
+# 环境变量与密钥（切勿进入镜像）
+.env
+.env.*
+
+# 日志
+logs
+*.log
+npm-debug.log
+
+# 版本控制与元信息
+.git
+.gitignore
+*.md
+
+# 测试与覆盖率
+coverage
+*.tsbuildinfo

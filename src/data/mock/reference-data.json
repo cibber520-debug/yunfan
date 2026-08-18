@@ -1,0 +1,116 @@
+{
+  "version": "2026.08-demo",
+  "updatedAt": "2026-08-17T06:00:00.000Z",
+  "provinces": [
+    {
+      "code": "GD",
+      "name": "广东省",
+      "examType": "NEW_312",
+      "maxScore": 750,
+      "ready": true,
+      "ruleSummary": "院校专业组 · 平行志愿 · 组内可调剂",
+      "subjectRule": {
+        "mode": "FIRST_SECOND",
+        "firstSubjects": ["PHY", "HIS"],
+        "secondSubjects": ["CHE", "BIO", "POL", "GEO"],
+        "selectionCount": 3,
+        "firstSubjectCount": 1,
+        "secondSubjectCount": 2,
+        "message": "3+1+2 须物理/历史二选一，再从化学、生物、政治、地理中选两门"
+      },
+      "maxBonusScore": 20
+    },
+    {
+      "code": "JS",
+      "name": "江苏省",
+      "examType": "NEW_312",
+      "maxScore": 750,
+      "ready": false,
+      "ruleSummary": "演示数据建设中",
+      "subjectRule": {
+        "mode": "FIRST_SECOND",
+        "firstSubjects": ["PHY", "HIS"],
+        "secondSubjects": ["CHE", "BIO", "POL", "GEO"],
+        "selectionCount": 3,
+        "firstSubjectCount": 1,
+        "secondSubjectCount": 2,
+        "message": "3+1+2 须物理/历史二选一，再从化学、生物、政治、地理中选两门"
+      },
+      "maxBonusScore": 20
+    },
+    {
+      "code": "ZJ",
+      "name": "浙江省",
+      "examType": "NEW_33",
+      "maxScore": 750,
+      "ready": false,
+      "ruleSummary": "演示数据建设中",
+      "subjectRule": {
+        "mode": "ANY",
+        "allowedSubjects": ["PHY", "HIS", "CHE", "BIO", "POL", "GEO"],
+        "selectionCount": 3,
+        "message": "3+3 须恰好选择 3 门不同科目"
+      },
+      "maxBonusScore": 20
+    },
+    {
+      "code": "HN",
+      "name": "河南省",
+      "examType": "OLD_SCI",
+      "maxScore": 750,
+      "ready": false,
+      "ruleSummary": "演示数据建设中",
+      "subjectRule": {
+        "mode": "FIXED",
+        "subjects": ["PHY", "CHE", "BIO"],
+        "message": "老高考理科须选择物理、化学、生物"
+      },
+      "maxBonusScore": 20
+    }
+  ],
+  "regions": ["大湾区", "长三角/江浙沪", "京津冀", "成渝", "中部"],
+  "majors": ["计算机科学与技术", "临床医学", "电子信息工程", "软件工程", "自动化", "土木工程", "市场营销"],
+  "optionCatalog": {
+    "subjects": [
+      { "code": "PHY", "label": "物理" },
+      { "code": "HIS", "label": "历史" },
+      { "code": "CHE", "label": "化学" },
+      { "code": "BIO", "label": "生物" },
+      { "code": "POL", "label": "政治" },
+      { "code": "GEO", "label": "地理" }
+    ],
+    "schoolTiers": [
+      { "code": "985", "label": "985" },
+      { "code": "211", "label": "211" },
+      { "code": "DOUBLE_FIRST_CLASS", "label": "双一流" },
+      { "code": "PROVINCIAL", "label": "省重点" },
+      { "code": "PUBLIC", "label": "公办普通" },
+      { "code": "PRIVATE", "label": "民办" },
+      { "code": "VOCATIONAL", "label": "高职专科" }
+    ],
+    "ownership": [
+      { "code": "ALL", "label": "不限" },
+      { "code": "PUBLIC", "label": "仅公办" },
+      { "code": "PRIVATE", "label": "仅民办" }
+    ],
+    "majorCategories": [
+      { "code": "ENGINEERING", "label": "工学" },
+      { "code": "MEDICINE", "label": "医学" },
+      { "code": "SCIENCE", "label": "理学" },
+      { "code": "ECONOMICS", "label": "经济学" },
+      { "code": "LITERATURE", "label": "文学" },
+      { "code": "MANAGEMENT", "label": "管理学" },
+      { "code": "LAW", "label": "法学" },
+      { "code": "AGRICULTURE", "label": "农学" }
+    ],
+    "identities": [
+      { "code": "NONE", "label": "无" },
+      { "code": "NATIONAL_SPECIAL", "label": "国家专项" },
+      { "code": "LOCAL_SPECIAL", "label": "地方专项" },
+      { "code": "COLLEGE_SPECIAL", "label": "高校专项" },
+      { "code": "STRONG_BASE", "label": "强基计划" },
+      { "code": "ART_SPORT", "label": "艺术体育类" },
+      { "code": "MINORITY_BONUS", "label": "少数民族加分" }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+# 运行时日志（按天滚动落盘，排查用，不入库）
+logs/
+
+# 依赖与构建产物
+node_modules/
+dist/
+*.tsbuildinfo

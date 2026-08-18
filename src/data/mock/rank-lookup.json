@@ -1,0 +1,12 @@
+{
+  "version": "2026.08-demo",
+  "updatedAt": "2026-08-17T06:00:00.000Z",
+  "segments": [
+    { "province": "GD", "examType": "NEW_312", "score": 660, "rank": 4200, "lower": 4000, "upper": 4400 },
+    { "province": "GD", "examType": "NEW_312", "score": 630, "rank": 9800, "lower": 9600, "upper": 10050 },
+    { "province": "GD", "examType": "NEW_312", "score": 612, "rank": 15230, "lower": 15000, "upper": 15300 },
+    { "province": "GD", "examType": "NEW_312", "score": 600, "rank": 20100, "lower": 19800, "upper": 20400 },
+    { "province": "GD", "examType": "NEW_312", "score": 580, "rank": 32500, "lower": 32000, "upper": 33000 },
+    { "province": "GD", "examType": "NEW_312", "score": 550, "rank": 56000, "lower": 55000, "upper": 57000 }
+  ]
+}

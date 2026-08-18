@@ -1,0 +1,117 @@
+.shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--color-paper);
+  box-shadow: var(--shadow-md);
+}
+
+.wide {
+  max-width: 760px;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+  outline: none;
+}
+
+.nav {
+  position: fixed;
+  z-index: 20;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  max-width: inherit;
+  min-height: var(--nav-height);
+  margin: 0 auto;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid var(--color-line);
+  box-shadow: 0 -4px 14px rgba(31, 42, 68, 0.05);
+  backdrop-filter: blur(12px);
+}
+
+.navLink {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  color: var(--color-ink-faint);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.authButton {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  color: var(--color-ink-faint);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.authButton:hover { color: #df6128; }
+
+.active {
+  color: #df6128;
+}
+
+.toast {
+  position: fixed;
+  z-index: 40;
+  bottom: calc(var(--nav-height) + 18px + env(safe-area-inset-bottom));
+  left: 50%;
+  max-width: calc(100vw - 32px);
+  padding: 11px 18px;
+  color: #fff;
+  background: #0f1b33;
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  font-size: 13px;
+  font-weight: 650;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 12px);
+  transition: 200ms ease;
+}
+
+.toastVisible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 359px) {
+  .shell {
+    box-shadow: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .shell {
+    margin-block: 24px;
+    min-height: calc(100dvh - 48px);
+    border-radius: 28px;
+  }
+
+  .nav {
+    bottom: 24px;
+    border-radius: 0 0 28px 28px;
+  }
+}

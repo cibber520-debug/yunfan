@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云帆志愿 · 交互原型</title>
+<style>
+  :root{
+    --sun-coral:#FF6B5C; --sun-orange:#FF9F43; --sun-amber:#FFC93C;
+    --sky-blue:#4DA3FF; --sky-deep:#2E86DE; --sprout:#2ED47A; --bloom:#1AB6C4;
+    --ink:#1F2A44; --ink-soft:#5B6B85; --ink-faint:#9AA7BD;
+    --paper:#FFF8F0; --card:#FFFFFF; --line:#EEF1F6;
+    --sun-grad:linear-gradient(135deg,#FFC93C 0%,#FF9F43 36%,#FF6B5C 70%,#4DA3FF 100%);
+    --sun-soft:linear-gradient(135deg,#FFE9C7,#FFD6A8 55%,#CDE8FF);
+    --shadow-sm:0 4px 14px rgba(255,140,60,.10);
+    --shadow-md:0 14px 40px rgba(255,120,60,.18);
+    --r:20px;
+    --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:var(--font);color:var(--ink);background:
+    radial-gradient(1200px 600px at 80% -10%,#FFE6CC,transparent 60%),
+    radial-gradient(900px 500px at 0% 100%,#D9ECFF,transparent 55%),
+    #FBF6F0;display:flex;justify-content:center;align-items:flex-start;padding:36px 16px 60px;}
+
+  /* ===== Phone frame (iPhone 17 Pro Max 440×956) ===== */
+  .device{width:440px;flex:0 0 440px;background:#0E1320;border-radius:54px;padding:11px;box-shadow:0 40px 80px rgba(40,30,20,.30);position:relative}
+  .device::before{content:"";position:absolute;top:13px;left:50%;transform:translateX(-50%);width:124px;height:36px;background:#0E1320;border-radius:20px;z-index:30}
+  .screen-wrap{position:relative;width:100%;height:956px;background:var(--paper);border-radius:42px;overflow:hidden}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
+  .screen.active{display:flex;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* status bar */
+  .statusbar{height:46px;flex:0 0 46px;display:flex;align-items:center;justify-content:space-between;padding:0 26px 0;font-size:13px;font-weight:700;color:var(--ink);position:relative;z-index:20}
+  .statusbar .ic{display:flex;gap:6px;align-items:center}
+  .statusbar svg{display:block}
+
+  .scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+  .scroll::-webkit-scrollbar{width:0}
+
+  /* ===== generic ===== */
+  .pad{padding:0 20px}
+  .btn{border:none;font-family:inherit;font-weight:700;cursor:pointer;border-radius:16px;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.18s}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:linear-gradient(135deg,#FF9F43,#FF6B5C);color:#fff;box-shadow:0 10px 24px rgba(255,107,92,.32);padding:16px}
+  .btn-ghost{background:#FFF1E6;color:#FF7A2F;padding:14px 18px;font-size:15px}
+  .btn-line{background:#fff;color:var(--ink-soft);border:1.5px solid var(--line);padding:14px 18px;font-size:15px}
+  .chip{display:inline-flex;align-items:center;gap:5px;padding:9px 15px;border-radius:999px;font-size:14px;font-weight:600;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;transition:.16s;user-select:none}
+  .chip.on{background:linear-gradient(135deg,#FF9F43,#FF6B5C);color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(255,107,92,.25)}
+  .chip.on.b{background:linear-gradient(135deg,#6DB4FF,#4DA3FF);box-shadow:0 6px 14px rgba(77,163,255,.25)}
+  .pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700}
+  .pill-o{background:#FFF1E6;color:#E8662A}.pill-b{background:#E8F2FF;color:var(--sky-deep)}.pill-g{background:#E6F9EF;color:#16A34A}.pill-c{background:#E2F7F9;color:#0E8E99}
+  .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow-sm);padding:18px}
+  .muted{color:var(--ink-soft)} .faint{color:var(--ink-faint)}
+  .sectitle{font-size:15px;font-weight:800;margin:6px 0 12px;display:flex;align-items:center;gap:8px}
+  .sectitle .dot{width:6px;height:18px;border-radius:4px;background:var(--sun-grad)}
+
+  /* ===== Home ===== */
+  .hero{background:var(--sun-grad);color:#fff;padding:18px 22px 30px;border-radius:0 0 30px 30px;position:relative;overflow:hidden}
+  .hero .rays{position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;
+    background:conic-gradient(from 0deg, rgba(255,255,255,.0) 0 18deg, rgba(255,255,255,.18) 18deg 20deg, rgba(255,255,255,0) 20deg 38deg, rgba(255,255,255,.18) 38deg 40deg, rgba(255,255,255,0) 40deg 58deg, rgba(255,255,255,.18) 58deg 60deg, rgba(255,255,255,0) 60deg 78deg, rgba(255,255,255,.18) 78deg 80deg, rgba(255,255,255,0) 80deg);}
+  .hero .sun{position:absolute;right:24px;top:18px;width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FFF6D6,#FFD23F 70%);box-shadow:0 0 40px rgba(255,220,120,.7)}
+  .hero .hi{font-size:14px;opacity:.92}
+  .hero h1{font-size:26px;font-weight:800;margin:6px 0 2px;letter-spacing:.5px}
+  .hero .tag{font-size:13px;opacity:.92}
+  .hero-cta{margin-top:20px;background:#fff;color:#FF7A2F;border-radius:18px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 12px 30px rgba(0,0,0,.12);cursor:pointer}
+  .hero-cta .ico{width:46px;height:46px;border-radius:14px;background:var(--sun-grad);display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 46px}
+  .hero-cta b{font-size:16px;color:var(--ink)} .hero-cta span{font-size:12px;color:var(--ink-faint)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+  .stat{background:rgba(255,255,255,.16);backdrop-filter:blur(4px);border-radius:14px;padding:12px 6px;text-align:center}
+  .stat b{font-size:17px;font-weight:800;display:block} .stat span{font-size:11px;opacity:.9}
+
+  .home-card{margin-top:18px}
+  .prog-card{background:linear-gradient(135deg,#FFF6EA,#FFEFE0);border:1px solid #FFE3C4;border-radius:var(--r);padding:16px}
+  .prog-card .pv{color:var(--sun-orange);font-weight:800;font-size:15px}
+  .progress{height:9px;border-radius:999px;background:#F2DDc4;overflow:hidden;margin-top:10px}
+  .progress>i{display:block;height:100%;background:var(--sun-grad);border-radius:999px}
+  .quick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .qcard{background:#fff;border-radius:16px;padding:14px;box-shadow:var(--shadow-sm);border:1px solid var(--line)}
+  .qcard .e{font-size:22px} .qcard b{font-size:14px;display:block;margin-top:6px} .qcard span{font-size:11px;color:var(--ink-faint)}
+
+  /* bottom tab */
+  .tabbar{flex:0 0 64px;display:flex;background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 14px rgba(0,0,0,.04)}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;color:var(--ink-faint);cursor:pointer;font-weight:600}
+  .tab.on{color:var(--sun-orange)} .tab.on svg{filter:drop-shadow(0 2px 4px rgba(255,140,60,.4))}
+
+  /* ===== Wizard ===== */
+  .wiz-top{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:10px 20px;background:#fff;border-bottom:1px solid var(--line)}
+  .wiz-top .back{width:34px;height:34px;border-radius:50%;background:#F4F6FA;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft)}
+  .wiz-top .ttl{font-weight:800;font-size:16px}
+  .wiz-bar{padding:14px 20px 6px;background:#fff}
+  .wiz-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-faint);margin-bottom:8px;font-weight:600}
+  .step-dots{display:flex;gap:6px}
+  .step-dots i{flex:1;height:6px;border-radius:999px;background:#EDEFF4;transition:.3s}
+  .step-dots i.done{background:var(--sun-orange)} .step-dots i.cur{background:linear-gradient(135deg,#FF9F43,#FF6B5C)}
+  .wiz-body{padding:18px 20px 8px}
+  .lead-q{font-size:19px;font-weight:800;line-height:1.4}
+  .lead-sub{font-size:13px;color:var(--ink-soft);margin-top:6px;margin-bottom:18px}
+  .field{margin-bottom:16px}
+  .field>label{font-size:13px;font-weight:700;color:var(--ink-soft);display:block;margin-bottom:8px}
+  .input{width:100%;padding:15px 16px;border-radius:14px;border:1.5px solid var(--line);background:#fff;font-size:16px;font-family:inherit;color:var(--ink);transition:.16s}
+  .input:focus{outline:none;border-color:var(--sun-orange);box-shadow:0 0 0 4px rgba(255,159,67,.12)}
+  .chips-wrap{display:flex;flex-wrap:wrap;gap:9px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .autofill{background:linear-gradient(135deg,#EAF4FF,#F0F8FF);border:1px dashed #9CC8FF;border-radius:14px;padding:14px;margin-top:6px}
+  .autofill .big{font-size:26px;font-weight:800;color:var(--sky-deep)} .autofill .sub{font-size:12px;color:var(--sky-deep);margin-top:2px}
+  .banner{border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:flex-start;margin-top:12px}
+  .banner-w{background:#FFF7E6;border:1px solid #FFE2A8;color:#B26A00}
+  .banner-i{background:#EAF4FF;border:1px solid #C7E2FF;color:var(--sky-deep)}
+  .subject{aspect-ratio:1;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;transition:.16s}
+  .subject.sel{background:linear-gradient(135deg,#FF9F43,#FF6B5C);color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(255,107,92,.25)}
+  .subject.bad{opacity:.4;pointer-events:none}
+  .wiz-foot{flex:0 0 auto;display:flex;gap:12px;padding:14px 20px calc(14px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line)}
+  .wiz-foot .btn{flex:1}
+
+  /* weight sliders */
+  .wrow{margin:20px 0}
+  .wrow .wh{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:10px}
+  .wrow .wv{color:var(--sun-orange);font-size:18px}
+  .wrow.b .wv{color:var(--sky-deep)} .wrow.g .wv{color:#16A34A}
+  .track{height:10px;border-radius:999px;background:#EEF1F6;position:relative}
+  .track>i{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
+  .track .fill-o{background:linear-gradient(90deg,#FFC93C,#FF6B5C)}
+  .track .fill-b{background:linear-gradient(90deg,#6DB4FF,#4DA3FF)}
+  .track .fill-g{background:linear-gradient(90deg,#5CE0A8,#2ED47A)}
+  .track>input{position:absolute;inset:-8px 0;width:100%;height:26px;opacity:0;cursor:pointer;margin:0}
+  .track>input::-webkit-slider-thumb{width:26px;height:26px}
+  .knob{position:absolute;top:50%;width:24px;height:24px;border-radius:50%;background:#fff;border:4px solid var(--sun-orange);transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,.15);pointer-events:none}
+  .knob.b{border-color:var(--sky-blue)} .knob.g{border-color:var(--sprout)}
+  .preset{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .preset .chip{font-size:12px;padding:7px 12px}
+  .preview{background:#0F1B33;border-radius:18px;padding:18px;margin-top:8px}
+  .preview .pt{color:#9FB2CC;font-size:12px;font-weight:700;margin-bottom:12px}
+  .pvbar{display:flex;gap:6px;height:88px;align-items:flex-end}
+  .pvbar .col{flex:1;border-radius:10px 10px 4px 4px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:8px;color:#fff;font-weight:800;font-size:15px;transition:height .35s ease}
+  .pvbar .col span{font-size:10px;font-weight:600;opacity:.9}
+  .c1{background:linear-gradient(180deg,#FF8A6B,#FF6B5C)} .c2{background:linear-gradient(180deg,#6DB4FF,#4DA3FF)}
+  .c3{background:linear-gradient(180deg,#4FE0A0,#2ED47A)} .c4{background:linear-gradient(180deg,#2ECBD8,#1AB6C4)}
+
+  /* ===== Result ===== */
+  .res-top{background:var(--sun-grad);color:#fff;padding:14px 20px 16px;position:relative;overflow:hidden}
+  .res-top .back{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.22);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:#fff}
+  .res-top h2{font-size:18px;font-weight:800;margin-top:8px}
+  .res-top .sm{font-size:12px;opacity:.92;margin-top:2px}
+  .tier-tabs{display:flex;gap:8px;padding:14px 20px 4px;background:var(--paper)}
+  .ttab{flex:1;text-align:center;padding:10px 4px;border-radius:14px;background:#fff;border:1.5px solid var(--line);cursor:pointer;transition:.16s}
+  .ttab.on{border-color:transparent;box-shadow:var(--shadow-sm)}
+  .ttab .t{font-size:15px;font-weight:800} .ttab .n{font-size:11px;color:var(--ink-faint);margin-top:2px}
+  .ttab.t1.on{background:linear-gradient(135deg,#FFE7DF,#FFF);box-shadow:inset 0 0 0 2px #FF8A6B}
+  .ttab.t2.on{background:linear-gradient(135deg,#E6F1FF,#FFF);box-shadow:inset 0 0 0 2px #4DA3FF}
+  .ttab.t3.on{background:linear-gradient(135deg,#E6F9EF,#FFF);box-shadow:inset 0 0 0 2px #2ED47A}
+  .ttab.t4.on{background:linear-gradient(135deg,#E2F7F9,#FFF);box-shadow:inset 0 0 0 2px #1AB6C4}
+  .tpanel{display:none;padding:6px 20px 20px}
+  .tpanel.on{display:block;animation:fade .3s}
+  .sch{border-radius:18px;background:#fff;box-shadow:var(--shadow-sm);padding:15px;margin-bottom:12px;border:1px solid var(--line)}
+  .sch .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .sch .nm{font-size:16px;font-weight:800} .sch .mj{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .sch .prob{text-align:right;flex:0 0 auto}
+  .sch .prob b{font-size:22px;font-weight:800;color:var(--sun-orange)}
+  .sch .prob.t2 b{color:var(--sky-deep)} .sch .prob.t3 b{color:#16A34A} .sch .prob.t4 b{color:#0E8E99}
+  .sch .prob span{font-size:10px;color:var(--ink-faint);display:block}
+  .sch .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+  .sch .acts{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+  .addbtn{background:linear-gradient(135deg,#FF9F43,#FF6B5C);color:#fff;border:none;border-radius:12px;padding:9px 16px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+  .addbtn.added{background:#E6F9EF;color:#16A34A}
+  .why{font-size:11px;color:var(--ink-faint);display:flex;align-items:center;gap:4px}
+
+  .vtab-foot{flex:0 0 auto;display:flex;gap:12px;padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line);align-items:center}
+  .vtab-foot .cnt{font-size:13px;color:var(--ink-soft);font-weight:600}
+  .vtab-foot .cnt b{color:var(--sun-orange);font-size:16px}
+  .vtab-foot .btn{flex:1}
+
+  .toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#0F1B33;color:#fff;padding:11px 18px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:60;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* profile menu */
+  .menu{display:flex;align-items:center;gap:12px;padding:14px 14px;cursor:pointer;border-radius:12px;font-size:15px;font-weight:600;color:var(--ink)}
+  .menu:active{background:#F6F8FB}
+  .menu .mi{font-size:20px;width:24px;text-align:center}
+  .menu .arr{margin-left:auto;color:var(--ink-faint);font-size:22px;font-weight:400}
+
+  .stage-label{position:fixed;top:0;left:50%;transform:translateX(-50%);background:#0E1320;color:#fff;font-size:12px;font-weight:600;padding:6px 16px;border-radius:0 0 12px 12px;z-index:100;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="stage-label">云帆志愿 · 移动端交互原型</div>
+
+<div class="device">
+  <div class="screen-wrap">
+
+    <!-- ===================== HOME ===================== -->
+    <section class="screen active" id="home">
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="ic">
+          <svg width="17" height="12"><rect x="0" y="7" width="3" height="5" fill="#1F2A44"/><rect x="4" y="5" width="3" height="7" fill="#1F2A44"/><rect x="8" y="3" width="3" height="9" fill="#1F2A44"/><rect x="12" y="0" width="3" height="12" fill="#1F2A44"/></svg>
+          <svg width="16" height="12"><path d="M8 2 L15 11 H1 Z" fill="none" stroke="#1F2A44" stroke-width="1.4"/><circle cx="8" cy="9" r="1.3" fill="#1F2A44"/></svg>
+          <svg width="26" height="13"><rect x="1" y="1" width="21" height="11" rx="3" fill="none" stroke="#1F2A44" stroke-width="1.3"/><rect x="3" y="3" width="15" height="7" rx="1.5" fill="#1F2A44"/><rect x="23" y="4" width="2" height="5" rx="1" fill="#1F2A44"/></svg>
+        </span>
+      </div>
+      <div class="scroll">
+        <div class="hero">
+          <div class="rays"></div><div class="sun"></div>
+          <div class="hi">下午好，准大学生 👋</div>
+          <h1>乘风破浪，直挂云帆</h1>
+          <div class="tag">用「省位次」为你规划向上的人生航线</div>
+          <div class="hero-cta" onclick="startWizard()">
+            <div class="ico">🧭</div>
+            <div><b>开始智能填报</b><br><span>7 步采集，5 分钟生成方案</span></div>
+          </div>
+          <div class="stats">
+            <div class="stat"><b>1300万+</b><span>年服务考生</span></div>
+            <div class="stat"><b>100%</b><span>保底覆盖</span></div>
+            <div class="stat"><b>≤5min</b><span>平均耗时</span></div>
+          </div>
+        </div>
+
+        <div class="pad" style="padding-top:20px">
+          <div class="prog-card">
+            <div class="pv">📋 我的填报进度</div>
+            <div style="font-size:13px;color:var(--ink-soft);margin-top:6px">尚未开始 · 完成 7 步即可生成专属志愿方案</div>
+            <div class="progress"><i style="width:0%"></i></div>
+            <button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="startWizard()">继续填报 →</button>
+          </div>
+
+          <div class="sectitle" style="margin-top:24px"><span class="dot"></span>快速通道</div>
+          <div class="quick">
+            <div class="qcard" onclick="startWizard(2)"><div class="e">📊</div><b>一分一段反查</b><span>输入分数秒懂位次</span></div>
+            <div class="qcard" onclick="go('result')"><div class="e">🎯</div><b>冲稳保垫</b><span>四级梯度可视化</span></div>
+            <div class="qcard" onclick="startWizard(5)"><div class="e">💡</div><b>意向唤醒</b><span>先选门类再选专业</span></div>
+            <div class="qcard" onclick="go('result')"><div class="e">🛡️</div><b>容错兜底</b><span>绝不让你滑档</span></div>
+          </div>
+
+          <div class="sectitle" style="margin-top:24px"><span class="dot"></span>为什么是云帆</div>
+          <div class="card" style="margin-bottom:18px">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="font-size:24px">🌅</div>
+              <div><b style="font-size:14px">位次主键 · 跨年稳定</b><div style="font-size:12px;color:var(--ink-soft);margin-top:3px">以「省位次」为唯一稳定匹配键，告别"用去年分数填今年志愿"的误区。</div></div>
+            </div>
+            <div style="height:1px;background:var(--line);margin:14px 0"></div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="font-size:24px">🪜</div>
+              <div><b style="font-size:14px">冲稳保垫 · 100% 保底</b><div style="font-size:12px;color:var(--ink-soft);margin-top:3px">四级梯度 + 主动降级，每位考生强制 ≥3 个"垫"档绝对兜底志愿。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div class="tab on" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-4v-6H10v6H6v-9H3z"/></svg>首页</div>
+        <div class="tab" onclick="startWizard()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg>填报</div>
+        <div class="tab" onclick="go('result')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>志愿表</div>
+        <div class="tab" onclick="go('profile')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>我的</div>
+      </div>
+    </section>
+
+    <!-- ===================== WIZARD ===================== -->
+    <section class="screen" id="wizard">
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="ic">
+          <svg width="17" height="12"><rect x="0" y="7" width="3" height="5" fill="#1F2A44"/><rect x="4" y="5" width="3" height="7" fill="#1F2A44"/><rect x="8" y="3" width="3" height="9" fill="#1F2A44"/><rect x="12" y="0" width="3" height="12" fill="#1F2A44"/></svg>
+          <svg width="16" height="12"><path d="M8 2 L15 11 H1 Z" fill="none" stroke="#1F2A44" stroke-width="1.4"/><circle cx="8" cy="9" r="1.3" fill="#1F2A44"/></svg>
+          <svg width="26" height="13"><rect x="1" y="1" width="21" height="11" rx="3" fill="none" stroke="#1F2A44" stroke-width="1.3"/><rect x="3" y="3" width="15" height="7" rx="1.5" fill="#1F2A44"/><rect x="23" y="4" width="2" height="5" rx="1" fill="#1F2A44"/></svg>
+        </span>
+      </div>
+      <div class="wiz-top">
+        <div class="back" onclick="wizBackTop()">‹</div>
+        <div class="ttl" id="wizTitle">采集向导</div>
+      </div>
+      <div class="wiz-bar">
+        <div class="wiz-meta"><span id="wizStepLabel">第 1 / 6 步</span><span id="wizStepName">省份与模式</span></div>
+        <div class="step-dots" id="stepDots"></div>
+      </div>
+      <div class="scroll">
+        <div class="wiz-body" id="wizBody"><!-- steps injected --></div>
+      </div>
+      <div class="wiz-foot">
+        <button class="btn btn-line" id="btnBack" onclick="prevStep()">上一步</button>
+        <button class="btn btn-primary" id="btnNext" onclick="nextStep()" style="flex:2">下一步</button>
+      </div>
+    </section>
+
+    <!-- ===================== RESULT ===================== -->
+    <section class="screen" id="result">
+      <div class="statusbar" style="background:var(--sun-grad);color:#fff">
+        <span>9:41</span>
+        <span class="ic">
+          <svg width="17" height="12"><rect x="0" y="7" width="3" height="5" fill="#fff"/><rect x="4" y="5" width="3" height="7" fill="#fff"/><rect x="8" y="3" width="3" height="9" fill="#fff"/><rect x="12" y="0" width="3" height="12" fill="#fff"/></svg>
+          <svg width="16" height="12"><path d="M8 2 L15 11 H1 Z" fill="none" stroke="#fff" stroke-width="1.4"/><circle cx="8" cy="9" r="1.3" fill="#fff"/></svg>
+          <svg width="26" height="13"><rect x="1" y="1" width="21" height="11" rx="3" fill="none" stroke="#fff" stroke-width="1.3"/><rect x="3" y="3" width="15" height="7" rx="1.5" fill="#fff"/><rect x="23" y="4" width="2" height="5" rx="1" fill="#fff"/></svg>
+        </span>
+      </div>
+      <div class="res-top" style="border-radius:0">
+        <div class="back" onclick="go('home')">‹</div>
+        <h2>你的志愿方案已生成 🎉</h2>
+        <div class="sm">广东 · 物理类 · 612 分 · 省位次 15230 · 冲稳保垫四级梯度</div>
+      </div>
+      <div class="scroll">
+        <div class="banner banner-w" style="margin:14px 20px 0">
+          <span>⚠️</span><div>已为你放宽：取消最低院校层次限制（原偏好要求 ≥ 公办普通）。<b style="cursor:pointer;text-decoration:underline" onclick="toast('已恢复你的原始偏好')">恢复原始偏好</b></div>
+        </div>
+        <div class="tier-tabs">
+          <div class="ttab t1 on" onclick="selTier(1)"><div class="t">冲</div><div class="n">2 个 · 30-60%</div></div>
+          <div class="ttab t2" onclick="selTier(2)"><div class="t">稳</div><div class="n">2 个 · 60-85%</div></div>
+          <div class="ttab t3" onclick="selTier(3)"><div class="t">保</div><div class="n">2 个 · 85-95%</div></div>
+          <div class="ttab t4" onclick="selTier(4)"><div class="t">垫</div><div class="n">3 个 · &gt;95%</div></div>
+        </div>
+
+        <!-- 冲 -->
+        <div class="tpanel on" id="tier1">
+          <div class="sch">
+            <div class="top"><div><div class="nm">中山大学（广州）</div><div class="mj">计算机类 · 院校专业组 A</div></div>
+              <div class="prob t1"><b>42%</b><span>录取概率</span></div></div>
+            <div class="meta"><span class="pill pill-o">冲 Reach</span><span class="pill pill-b">位次匹配 85%</span><span class="pill pill-c">新工科</span></div>
+            <div class="acts"><div class="why">⚲ 去年位次略高于你，跳一跳够得着</div><button class="addbtn" onclick="addVol(this)">+ 加入</button></div>
+          </div>
+          <div class="sch">
+            <div class="top"><div><div class="nm">华南理工大学</div><div class="mj">电子信息类 · 院校专业组 B</div></div>
+              <div class="prob t1"><b>55%</b><span>录取概率</span></div></div>
+            <div class="meta"><span class="pill pill-o">冲 Reach</span><span class="pill pill-b">选科符合 ✓</span><span class="pill pill-g">双一流</span></div>
+            <div class="acts"><div class="why">⚲ 工科强校，与你的选科高度契合</div><button class="addbtn" onclick="addVol(this)">+ 加入</button></div>
+          </div>
+        </div>
+
+        <!-- 稳 -->
+        <div class="tpanel" id="tier2">
+          <div class="sch">
+            <div class="top"><div><div class="nm">暨南大学</div><div class="mj">临床医学（5+3）· 院校专业组 C</div></div>
+              <div class="prob t2"><b>72%</b><span>录取概率</span></div></div>
+            <div class="meta"><span class="pill pill-b">稳 Match</span><span class="pill pill-b">选科符合 ✓</span><span class="pill pill-g">211</span></div>
+            <div class="acts"><div class="why">⚲ 位次落在 ±5% 稳区间</div><button class="addbtn" onclick="addVol(this)">+ 加入</button></div>
+          </div>
+          <div class="sch">
+            <div class="top"><div><div class="nm">深圳大学</div><div class="mj">计算机科学与技术 · 院校专业组 D</div></div>
+              <div class="prob t2"><b>78%</b><span>录取概率</span></div></div>
+            <div class="meta"><span class="pill pill-b">稳 Match</span><span class="pill pill-c">地域偏好 江浙沪✓</span><span class="pill pill-o">预测数据</span></div>
+            <div class="acts"><div class="why">⚲ 今年新增 AI 大类，置信度 0.6</div><button class="addbtn" onclick="addVol(this)">+ 加入</button></div>
+          </div>
+        </div>
+
+        <!-- 保 -->
+        <div class="tpanel" id="tier3">
+          <div class="sch">
+            <div class="top"><div><div class="nm">广东工业大学</div><div class="mj">自动化 · 院校专业组 E</div></div>
+              <div class="prob t3"><b>90%</b><span>录取概率</span></div></div>
+            <div class="meta"><span class="pill pill-g">保 Safe</span><span class="pill pill-b">选科符合 ✓</span><span class="pill pill-g">公办</span></div>
+            <div class="acts"><div class="why">⚲ 位次下浮 15-25%，较安全</div><button class="addbtn" onclick="addVol(this)">+ 加入</button></div>
+          </div>
+          <div class="sch">
+            <div class="top"><div><div class="nm">华南师范大学</div><div class="mj">软件工程 · 院校专业组 F</div></div>
+              <div class="prob t3"><b>88%</b><span>录取概率</span></div></div>
+            <div class="meta"><span class="pill pill-g">保 Safe</span><span class="pill pill-b">211</span><span class="pill pill-c">师范强校</span></div>
+            <div class="acts"><div class="why">⚲ 稳中偏保，专业契合度高</div><button class="addbtn" onclick="addVol(this)">+ 加入</button></div>
+          </div>
+        </div>
+
+        <!-- 垫 -->
+        <div class="tpanel" id="tier4">
+          <div class="sch">
+            <div class="top"><div><div class="nm">广州大学</div><div class="mj">计算机类 · 院校专业组 G</div></div>
+              <div class="prob t4"><b>97%</b><span>录取概率</span></div></div>
+            <div class="meta"><span class="pill pill-c">垫 Cushion</span><span class="pill pill-b">选科符合 ✓</span><span class="pill pill-g">绝对兜底</span></div>
+            <div class="acts"><div class="why">⚲ 位次下浮 30%+，最稳保底</div><button class="addbtn" onclick="addVol(this)">+ 加入</button></div>
+          </div>
+          <div class="sch">
+            <div class="top"><div><div class="nm">汕头大学</div><div class="mj">电子信息工程 · 院校专业组 H</div></div>
+              <div class="prob t4"><b>96%</b><span>录取概率</span></div></div>
+            <div class="meta"><span class="pill pill-c">垫 Cushion</span><span class="pill pill-g">公办</span><span class="pill pill-g">保底</span></div>
+            <div class="acts"><div class="why">⚲ 兜底志愿，安心之选</div><button class="addbtn" onclick="addVol(this)">+ 加入</button></div>
+          </div>
+          <div class="sch">
+            <div class="top"><div><div class="nm">广东外语外贸大学</div><div class="mj">计算机科学与技术 · 院校专业组 I</div></div>
+              <div class="prob t4"><b>95%</b><span>录取概率</span></div></div>
+            <div class="meta"><span class="pill pill-c">垫 Cushion</span><span class="pill pill-b">语言+IT 特色</span><span class="pill pill-g">保底</span></div>
+            <div class="acts"><div class="why">⚲ 第三道兜底，确保不滑档</div><button class="addbtn" onclick="addVol(this)">+ 加入</button></div>
+          </div>
+        </div>
+
+        <div style="padding:6px 20px 24px">
+          <div class="card" style="background:linear-gradient(135deg,#FFF6EA,#FFEFE0);border:1px solid #FFE3C4">
+            <div style="font-size:13px;color:var(--ink-soft)">📌 预测非承诺：以上概率基于历史位次与招生计划估算，仅供参考。最终结果以省考试院投档为准。</div>
+          </div>
+        </div>
+      </div>
+      <div class="vtab-foot">
+        <div class="cnt">已选 <b id="volCount">0</b> 个志愿</div>
+        <button class="btn btn-primary" onclick="toast('志愿表已保存，可随时返回调整 ✓')">查看 / 保存志愿表</button>
+      </div>
+    </section>
+
+    <!-- ===================== PROFILE ===================== -->
+    <section class="screen" id="profile">
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="ic">
+          <svg width="17" height="12"><rect x="0" y="7" width="3" height="5" fill="#1F2A44"/><rect x="4" y="5" width="3" height="7" fill="#1F2A44"/><rect x="8" y="3" width="3" height="9" fill="#1F2A44"/><rect x="12" y="0" width="3" height="12" fill="#1F2A44"/></svg>
+          <svg width="16" height="12"><path d="M8 2 L15 11 H1 Z" fill="none" stroke="#1F2A44" stroke-width="1.4"/><circle cx="8" cy="9" r="1.3" fill="#1F2A44"/></svg>
+          <svg width="26" height="13"><rect x="1" y="1" width="21" height="11" rx="3" fill="none" stroke="#1F2A44" stroke-width="1.3"/><rect x="3" y="3" width="15" height="7" rx="1.5" fill="#1F2A44"/><rect x="23" y="4" width="2" height="5" rx="1" fill="#1F2A44"/></svg>
+        </span>
+      </div>
+      <div class="scroll">
+        <div class="hero" style="border-radius:0 0 30px 30px;padding:14px 22px 28px">
+          <div class="rays"></div><div class="sun" style="opacity:.55"></div>
+          <div style="display:flex;align-items:center;gap:14px;position:relative;z-index:2">
+            <div style="width:62px;height:62px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 6px 16px rgba(0,0,0,.12);flex:0 0 62px">🎓</div>
+            <div><div style="font-size:20px;font-weight:800">准大学生</div><div style="font-size:13px;opacity:.92;margin-top:2px">广东 · 物理类 · 612 分 · 省位次 15230</div></div>
+          </div>
+        </div>
+        <div class="pad" style="padding-top:18px">
+          <div class="card" style="margin-top:-46px;position:relative;z-index:3">
+            <div class="grid3" style="text-align:center">
+              <div><b style="font-size:20px;color:var(--sun-orange)">0</b><div class="faint" style="font-size:12px">我的方案</div></div>
+              <div><b style="font-size:20px;color:var(--sprout)">100%</b><div class="faint" style="font-size:12px">保底覆盖</div></div>
+              <div><b style="font-size:20px;color:var(--sky-deep)">3</b><div class="faint" style="font-size:12px">收藏院校</div></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:14px;background:var(--sun-grad);color:#fff;border:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+              <div><b style="font-size:15px">🌟 安心包 · 滑档无忧</b><div style="font-size:12px;opacity:.94;margin-top:3px">专家兜底 + 志愿保险，高考季限时 ¥199</div></div>
+              <button class="btn" style="background:#fff;color:#FF7A2F;padding:10px 15px;font-size:13px;flex:0 0 auto" onclick="toast('安心包为 Phase 2 规划能力')">了解 ›</button>
+            </div>
+          </div>
+
+          <div class="sectitle" style="margin-top:22px"><span class="dot"></span>常用</div>
+          <div class="card" style="padding:6px 4px">
+            <div class="menu" onclick="go('result')"><span class="mi">📋</span><span>我的志愿表</span><span class="arr">›</span></div>
+            <div class="menu" onclick="startWizard()"><span class="mi">🧭</span><span>重新填报 / 进度</span><span class="arr">›</span></div>
+            <div class="menu" onclick="toast('消息中心开发中')"><span class="mi">🔔</span><span>消息通知</span><span class="arr">›</span></div>
+          </div>
+
+          <div class="card" style="margin-top:14px;padding:6px 4px">
+            <div class="menu" onclick="toast('帮助中心开发中')"><span class="mi">💡</span><span>帮助中心</span><span class="arr">›</span></div>
+            <div class="menu" onclick="toast('设置开发中')"><span class="mi">⚙️</span><span>设置</span><span class="arr">›</span></div>
+            <div class="menu" onclick="toast('关于云帆志愿 v1.0')"><span class="mi">ℹ️</span><span>关于云帆志愿</span><span class="arr">›</span></div>
+          </div>
+
+          <div style="text-align:center;color:var(--ink-faint);font-size:12px;margin:24px 0 10px">云帆志愿 v1.0 · 乘风破浪，直挂云帆</div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div class="tab" onclick="go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-4v-6H10v6H6v-9H3z"/></svg>首页</div>
+        <div class="tab" onclick="startWizard()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg>填报</div>
+        <div class="tab" onclick="go('result')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>志愿表</div>
+        <div class="tab" onclick="go('profile')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>我的</div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+  /* ---------- 屏幕路由 ---------- */
+  function go(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const tb=document.getElementById(id).querySelector('.tabbar');
+    if(tb){
+      const idx={'home':0,'result':2,'profile':3,'wizard':1}[id] ?? -1;
+      tb.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on', i===idx));
+    }
+  }
+
+  /* ---------- 首页 → 向导 ---------- */
+  function startWizard(jump){
+    go('wizard');
+    currentStep = jump ? Math.min(jump,6) : 1;
+    renderStep();
+  }
+  function wizBackTop(){ if(currentStep>1){currentStep=1;renderStep();} else go('home'); }
+
+  /* ---------- 向导状态 ---------- */
+  let currentStep = 1;
+  const steps = [
+    {n:'省份与模式', q:'你在哪个省高考？', s:'选省后系统自动推导高考模式，无需手动判断。'},
+    {n:'成绩与位次', q:'考了多少分？', s:'输入总分，系统自动反查你的省位次与一分一段区间。'},
+    {n:'选科组合', q:'你的选科是？', s:'按高考模式动态生成合法组合，非法组合会被实时拦截。'},
+    {n:'身份与加分', q:'有专项 / 加分身份吗？', s:'默认"无"，相关字段折叠，降低首屏负担。'},
+    {n:'意向唤醒', q:'想去哪类学校 / 专业？', s:'先用热门大类卡片唤醒意向，再细化地域与专业。'},
+    {n:'权重矩阵', q:'你更看重什么？', s:'三滑块联动归一，实时预览冲稳保垫分布。'}
+  ];
+
+  function renderStep(){
+    // top + dots
+    document.getElementById('wizTitle').textContent = steps[currentStep-1].n;
+    document.getElementById('wizStepLabel').textContent = '第 '+currentStep+' / 6 步';
+    document.getElementById('wizStepName').textContent = steps[currentStep-1].n;
+    let dots=''; for(let i=1;i<=6;i++){ dots+='<i class="'+(i<currentStep?'done':i==currentStep?'cur':'')+'"></i>'; }
+    document.getElementById('stepDots').innerHTML=dots;
+    document.getElementById('btnBack').style.visibility = currentStep===1?'hidden':'visible';
+    document.getElementById('btnNext').textContent = currentStep===6?'生成志愿方案 →':'下一步';
+    document.getElementById('wizBody').innerHTML = stepHTML(currentStep);
+    if(currentStep===6) initSliders();
+  }
+
+  function prevStep(){ if(currentStep>1){currentStep--;renderStep();} }
+  function nextStep(){
+    if(currentStep<6){currentStep++;renderStep();}
+    else { go('result'); }
+  }
+
+  /* ---------- 各步 HTML ---------- */
+  function stepHTML(s){
+    if(s===1){
+      return `
+      <div class="lead-q">${steps[0].q}</div><div class="lead-sub">${steps[0].s}</div>
+      <div class="field"><label>生源省份</label>
+        <input class="input" value="广东省" /></div>
+      <div class="field"><label>高考模式（已自动推导）</label>
+        <input class="input" value="3+1+2（新高考）" /></div>
+      <div class="banner banner-i">ℹ️ 广东为"院校专业组"投档单位，组内可调剂。已为你加载对应规则集。</div>`;
+    }
+    if(s===2){
+      return `
+      <div class="lead-q">${steps[1].q}</div><div class="lead-sub">${steps[1].s}</div>
+      <div class="field"><label>总分（满分 750）</label>
+        <input class="input" value="612" /></div>
+      <div class="autofill">
+        <div class="sub">✨ 系统已自动反查</div>
+        <div class="big">省位次 15230</div>
+        <div class="sub">对应一分一段区间：612 分 ≈ 15000–15300 名</div>
+      </div>
+      <div class="banner banner-i">ℹ️ 可由你手动核对 / 覆盖；偏差 &gt;±3% 时将提示"位次与分数不匹配"。</div>`;
+    }
+    if(s===3){
+      const subs=[['物理','phy',1],['历史','his',0],['化学','che',1],['生物','bio',1],['政治','pol',0],['地理','geo',0]];
+      let g='';
+      subs.forEach(([n,id,sel])=>{ g+=`<div class="subject ${sel?'sel':''}" data-sub="${id}" onclick="toggleSub(this)">${n}</div>`; });
+      return `
+      <div class="lead-q">${steps[2].q}</div><div class="lead-sub">${steps[2].s}</div>
+      <div class="field"><label>首选科目（2 选 1）</label><div class="grid2">${subs.slice(0,2).map(([n,id,sel])=>`<div class="subject ${sel?'sel':''}" data-sub="${id}" onclick="toggleSub(this,'one')">${n}</div>`).join('')}</div></div>
+      <div class="field"><label>再选科目（4 选 2）</label><div class="grid2">${subs.slice(2).map(([n,id,sel])=>`<div class="subject ${sel?'sel':''}" data-sub="${id}" onclick="toggleSub(this)">${n}</div>`).join('')}</div></div>
+      <div class="banner banner-w">⚠️ 临床医学类要求"物理+化学"，你的选科符合 ✓ 已为你纳入相关志愿。</div>`;
+    }
+    if(s===4){
+      const ids=[['无',1],['国家专项',0],['地方专项',0],['高校专项',0],['强基计划',0],['艺术体育类',0],['少数民族加分',0],['退役军人/烈士子女',0]];
+      let c=''; ids.forEach(([n,on])=>{ c+=`<span class="chip ${on?'on':''}" onclick="toggleChip(this)">${n}</span>`; });
+      return `
+      <div class="lead-q">${steps[3].q}</div><div class="lead-sub">${steps[3].s}</div>
+      <div class="field"><label>特殊身份 / 加分项（可多选）</label><div class="chips-wrap">${c}</div></div>
+      <div class="autofill"><div class="sub">已选：国家专项 → 自动纳入专项批次可报院校</div>
+        <div class="field" style="margin-top:12px"><label>加分值（≤20）</label><input class="input" value="20" /></div></div>
+      <div class="banner banner-i">ℹ️ 进阶身份默认折叠，普通考生可直接"下一步"，零门槛。</div>`;
+    }
+    if(s===5){
+      const tiers=[['985',1],['211',1],['双一流',1],['省重点',0],['公办普通',0],['民办',0],['高职专科',0]];
+      const cats=[['工学',1],['医学',1],['理学',0],['经济学',0],['文学',0],['管理学',0],['法学',0],['农学',0],['艺术类',0]];
+      const regions=[['长三角/江浙沪',1],['京津冀',0],['大湾区',0],['成渝',0],['中部',0]];
+      let t='',c='',r='';
+      tiers.forEach(([n,on])=>t+=`<span class="chip ${on?'on':''}" onclick="toggleChip(this)">${n}</span>`);
+      cats.forEach(([n,on])=>c+=`<div class="subject ${on?'sel':''}" style="border-radius:14px" data-cat="${n}" onclick="toggleSub(this)">${n}</div>`);
+      regions.forEach(([n,on])=>r+=`<span class="chip ${on?'on b':''}" onclick="toggleChip(this,'b')">${n}</span>`);
+      return `
+      <div class="lead-q">${steps[4].q}</div><div class="lead-sub">${steps[4].s}</div>
+      <div class="field"><label>院校层次偏好</label><div class="chips-wrap">${t}</div></div>
+      <div class="field"><label>学科门类（先选门类，再选专业）</label><div class="grid3" style="gap:9px">${c}</div></div>
+      <div class="field"><label>具体专业偏好</label>
+        <input class="input" value="临床医学、计算机科学与技术" /></div>
+      <div class="field"><label>经济圈偏好</label><div class="chips-wrap">${r}</div></div>
+      <div class="field"><label>绝对不读（黑名单）</label>
+        <input class="input" value="土木工程、市场营销" style="color:var(--sun-orange)" /></div>`;
+    }
+    if(s===6){
+      return `
+      <div class="lead-q">${steps[5].q}</div><div class="lead-sub">${steps[5].s}</div>
+      <div class="wrow"><div class="wh"><span>🛡️ 保专业权重</span><span class="wv" id="v1">50</span></div>
+        <div class="track"><i class="fill-o" id="f1" style="width:50%"></i><div class="knob" id="k1" style="left:50%"></div>
+        <input type="range" min="0" max="100" value="50" id="s1" oninput="onSlide(1)"></div></div>
+      <div class="wrow b"><div class="wh"><span>🏫 保学校权重</span><span class="wv" id="v2">30</span></div>
+        <div class="track"><i class="fill-b" id="f2" style="width:30%"></i><div class="knob b" id="k2" style="left:30%"></div>
+        <input type="range" min="0" max="100" value="30" id="s2" oninput="onSlide(2)"></div></div>
+      <div class="wrow g"><div class="wh"><span>🌆 冲城市权重</span><span class="wv" id="v3">20</span></div>
+        <div class="track"><i class="fill-g" id="f3" style="width:20%"></i><div class="knob g" id="k3" style="left:20%"></div>
+        <input type="range" min="0" max="100" value="20" id="s3" oninput="onSlide(3)"></div></div>
+      <div class="preset">
+        <span class="chip" onclick="setPreset(33,33,34)">⚖️ 一键均衡 33/33/34</span>
+        <span class="chip" onclick="setPreset(50,30,20)">🛡️ 保专业优先</span>
+        <span class="chip" onclick="setPreset(20,50,30)">🏫 保学校优先</span>
+        <span class="chip" onclick="setPreset(20,30,50)">🌆 冲城市优先</span>
+      </div>
+      <div class="preview">
+        <div class="pt">实时预览 · 冲稳保垫数量分布</div>
+        <div class="pvbar">
+          <div class="col c1" id="pv1" style="height:40%">2<span>冲</span></div>
+          <div class="col c2" id="pv2" style="height:55%">2<span>稳</span></div>
+          <div class="col c3" id="pv3" style="height:75%">2<span>保</span></div>
+          <div class="col c4" id="pv4" style="height:100%">3<span>垫</span></div>
+        </div>
+      </div>
+      <div class="banner banner-i">ℹ️ 三者之和须 =100 才能生成方案；拖动其一，另两者按比例自动归一。</div>`;
+    }
+  }
+
+  /* ---------- 选择交互 ---------- */
+  function toggleChip(el,cls){ el.classList.toggle('on'); if(cls) el.classList.toggle(cls); }
+  function toggleSub(el,mode){
+    if(mode==='one'){
+      el.parentElement.querySelectorAll('.subject').forEach(x=>x.classList.remove('sel'));
+      el.classList.add('sel');
+    } else { el.classList.toggle('sel'); }
+  }
+
+  /* ---------- 权重滑块联动 ---------- */
+  let W=[50,30,20];
+  function initSliders(){ W=[50,30,20]; }
+  function onSlide(changed){
+    const val=+document.getElementById('s'+changed).value;
+    const others=[1,2,3].filter(i=>i!==changed);
+    const rest=100-val;
+    const oldSum=W[others[0]-1]+W[others[1]-1] || 1;
+    W[changed-1]=val;
+    W[others[0]-1]=Math.round(rest*(W[others[0]-1]/oldSum));
+    W[others[1]-1]=100-val-W[others[0]-1];
+    paintSliders();
+  }
+  function setPreset(a,b,c){ W=[a,b,c];
+    [1,2,3].forEach(i=>document.getElementById('s'+i).value=W[i-1]); paintSliders(); }
+  function paintSliders(){
+    for(let i=1;i<=3;i++){
+      document.getElementById('v'+i).textContent=W[i-1];
+      document.getElementById('f'+i).style.width=W[i-1]+'%';
+      document.getElementById('k'+i).style.left=W[i-1]+'%';
+    }
+    // 预览：权重越高，对应梯度越多（示意）
+    const map=[W[0],W[1],W[2]];
+    const h=[40,55,75,100];
+    document.getElementById('pv1').style.height=(h[0]*0.4+W[2]*0.6)+'%';
+    document.getElementById('pv2').style.height=(h[1]*0.5+W[1]*0.5)+'%';
+    document.getElementById('pv3').style.height=(h[2]*0.5+W[0]*0.5)+'%';
+    document.getElementById('pv4').style.height='100%';
+  }
+
+  /* ---------- 结果页 ---------- */
+  function selTier(n){
+    document.querySelectorAll('.ttab').forEach((t,i)=>t.classList.toggle('on',i+1===n));
+    document.querySelectorAll('.tpanel').forEach((p,i)=>p.classList.toggle('on',i+1===n));
+  }
+  let vol=0;
+  function addVol(btn){
+    if(btn.classList.contains('added')){ btn.classList.remove('added'); btn.textContent='+ 加入'; vol--; }
+    else { btn.classList.add('added'); btn.textContent='✓ 已加入'; vol++; }
+    document.getElementById('volCount').textContent=vol;
+    toast(vol>0?('已加入 '+vol+' 个志愿到志愿表'):'已清空志愿表');
+  }
+
+  /* ---------- Toast ---------- */
+  let toastTimer;
+  function toast(msg){
+    const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1800);
+  }
+</script>
+</body>
+</html>

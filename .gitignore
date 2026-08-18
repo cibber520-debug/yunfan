@@ -1,0 +1,27 @@
+# ===== 依赖 =====
+node_modules/
+server/node_modules/
+
+# ===== 构建产物 =====
+dist/
+server/dist/
+*.tsbuildinfo
+vite.config.ts.timestamp-*
+
+# ===== 环境变量 / 密钥（保留示例文件）=====
+.env
+.env.*
+!.env.production.example
+.env.development
+
+# ===== 运行时 / 日志 =====
+.runtime/
+logs/
+*.log
+
+# ===== 编辑器 / OS =====
+.DS_Store
+.vite/
+
+# ===== 本地 agent 数据（不入库）=====
+.workbuddy-ai/

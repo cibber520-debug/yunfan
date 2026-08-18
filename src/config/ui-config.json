@@ -1,0 +1,54 @@
+{
+  "wizard": {
+    "steps": [
+      { "id": "province", "navLabel": "省份与模式", "title": "你在哪个省高考？", "description": "选省后系统自动推导高考模式。" },
+      { "id": "score", "navLabel": "成绩与位次", "title": "考了多少分？", "description": "输入总分，自动反查省位次与一分一段区间。" },
+      { "id": "subjects", "navLabel": "选科组合", "title": "你的选科是？", "description": "按照高考模式实时校验合法组合。" },
+      { "id": "identity", "navLabel": "身份与加分", "title": "有专项 / 加分身份吗？", "description": "默认“无”，高级信息按需展开。" },
+      { "id": "preferences", "navLabel": "意向唤醒", "title": "想去哪类学校 / 专业？", "description": "先选门类，再细化地域和专业。" },
+      { "id": "weights", "navLabel": "权重矩阵", "title": "你更看重什么？", "description": "调整一个滑块，其余权重自动归一。" }
+    ],
+    "weightLabels": {
+      "major": "保专业",
+      "school": "保学校",
+      "city": "冲城市"
+    },
+    "weightPresets": [
+      { "id": "balanced", "label": "一键均衡", "weights": { "major": 33, "school": 33, "city": 34 } },
+      { "id": "major", "label": "保专业优先", "weights": { "major": 50, "school": 30, "city": 20 } },
+      { "id": "school", "label": "保学校优先", "weights": { "major": 20, "school": 50, "city": 30 } },
+      { "id": "city", "label": "冲城市优先", "weights": { "major": 20, "school": 30, "city": 50 } }
+    ],
+    "distribution": [
+      { "tier": "REACH", "label": "冲", "minHeight": 34, "countLabel": "2" },
+      { "tier": "MATCH", "label": "稳", "minHeight": 46, "countLabel": "2" },
+      { "tier": "SAFE", "label": "保", "minHeight": 62, "countLabel": "2" },
+      { "tier": "CUSHION", "label": "垫", "minHeight": 100, "countLabel": "≥3" }
+    ]
+  },
+  "recommendation": {
+    "tiers": [
+      { "code": "REACH", "name": "冲", "longName": "冲 · 进取", "english": "Reach", "range": "30–60%", "isCushion": false },
+      { "code": "MATCH", "name": "稳", "longName": "稳 · 匹配", "english": "Match", "range": "60–85%", "isCushion": false },
+      { "code": "SAFE", "name": "保", "longName": "保 · 安全", "english": "Safe", "range": "85–95%", "isCushion": false },
+      { "code": "CUSHION", "name": "垫", "longName": "垫 · 托底", "english": "Cushion", "range": ">95%", "isCushion": true }
+    ],
+    "confidence": [
+      { "min": 0.8, "label": "高" },
+      { "min": 0.6, "label": "中" },
+      { "min": 0, "label": "低" }
+    ]
+  },
+  "examTypeLabels": {
+    "NEW_312": "3+1+2（新高考）",
+    "NEW_33": "3+3（新高考）",
+    "OLD_SCI": "老高考理科",
+    "OLD_ART": "老高考文科"
+  },
+  "navigation": [
+    { "id": "home", "label": "首页", "route": "home", "active": "exact" },
+    { "id": "wizard", "label": "填报", "route": "wizard", "active": "wizard" },
+    { "id": "volunteers", "label": "志愿表", "route": "volunteers", "active": "volunteersAndResults" },
+    { "id": "profile", "label": "我的", "route": "profile", "active": "exact" }
+  ]
+}

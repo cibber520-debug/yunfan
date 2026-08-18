@@ -1,0 +1,14 @@
+{
+  "envId": "<your-env-id>",
+  "hosting": {
+    "deployLocal": true,
+    "localPath": "dist",
+    "ignore": ["**/*.map"]
+  },
+  "cloudRunBackend": {
+    "note": "云托管（CloudBase Run）后端容器不由此文件部署，需在 CloudBase 控制台「云托管」手动创建服务：选择关联代码仓库并读取 server/Dockerfile 构建镜像，或直接上传镜像。服务监听端口须设为 3001；健康检查路径设为 GET /api/v1/health；运行时在控制台「环境变量」逐条注入 deploy/backend-env.example 中的变量（DATA_SOURCE=postgres、PG*、CORS_ORIGIN、AUTH_*、敏感密钥等）。",
+    "dockerfile": "server/Dockerfile",
+    "listenPort": 3001,
+    "healthCheckPath": "/api/v1/health"
+  }
+}

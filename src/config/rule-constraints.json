@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "weightTotal": 100,
+  "minWeight": 0,
+  "minimumCushionCount": 3,
+  "storage": {
+    "key": "yunfan:app-state:v1",
+    "schemaVersion": 1,
+    "persistedFields": ["wizardDraft", "completedStep", "selectedVolunteerIds"]
+  }
+}

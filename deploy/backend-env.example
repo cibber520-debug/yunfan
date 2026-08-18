@@ -1,0 +1,100 @@
+# ============================================================
+# 云帆志愿后端 · 云托管（CloudBase Run）环境变量模板
+# ============================================================
+# 在 CloudBase 控制台「云托管 → 服务 → 环境变量」中逐项注入；
+# 或复制本文件为 server/.env（本地调试用），但切勿将含真实密钥的
+# .env 提交到仓库。
+#
+# 标注说明：
+#   [必填]   生产必须设置
+#   [可选]   有默认值，可省略
+#   [敏感]   密钥类，控制台注入，勿入库
+# ============================================================
+
+# ---- 服务基础 ----
+# [可选] 监听端口：云托管「服务端口/监听端口」须为 3001（默认 3001）
+PORT=3001
+# [可选] 绑定地址（容器内监听 0.0.0.0）
+HOST=0.0.0.0
+# [推荐] 运行环境：生产必须为 production
+NODE_ENV=production
+# [可选] 是否位于可信反向代理之后（云托管前置可信反代可设 1，默认 0）
+TRUST_PROXY=0
+
+# ---- 数据源 ----
+# [必填] 云端走真实 PostgreSQL，必须为 postgres
+DATA_SOURCE=postgres
+# [可选] 种子数据版本标签（一般保持默认）
+SEED_VERSION=2026.08-demo
+
+# ---- 跨域（[必填] 生产）----
+# 前端静态站域名，多个用逗号分隔。
+# 例如：https://<envId>.tcloudbaseapp.com
+CORS_ORIGIN=<静态站域名>
+
+# ---- PostgreSQL 连接（DATA_SOURCE=postgres 时生效，[必填]）----
+PGHOST=<云PostgreSQL内网或公网地址>
+PGPORT=5432
+PGUSER=<云PG高权账号>
+PGPASSWORD=<云PG密码，[敏感] 控制台注入>
+PGDATABASE=yunfan
+# [可选] 连接池上限（按实例规格调整，默认 10）
+PG_POOL_MAX=10
+
+# ---- 大模型（推荐生成，[可选]）----
+# [可选] 是否启用大模型：true 时若未配置 API Key 自动降级本地引擎
+USE_LLM=true
+# [可选] DeepSeek 兼容接口密钥（空则降级）。[敏感] 控制台注入
+DEEPSEEK_API_KEY=
+# [可选] 模型名
+LLM_MODEL=deepseek-v4-flash
+# [可选] 接口地址（OpenAI 兼容 /chat/completions 前缀省略）
+LLM_BASE_URL=https://api.deepseek.com
+# [可选] 单次生成超时（毫秒）
+LLM_TIMEOUT_MS=60000
+
+# ---- 认证（[必填] AUTH_SESSION_SECRET / AUTH_CODE_PEPPER）----
+# 生成随机密钥命令：
+#   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+AUTH_SESSION_SECRET=<必填，随机hex，如 a1b2c3...>
+AUTH_CODE_PEPPER=<必填，随机hex，如 d4e5f6...>
+# [可选] 会话 Cookie 名
+AUTH_SESSION_COOKIE_NAME=yunfan_session
+# [可选] 跨站 Cookie 策略：前后端不同源且均 HTTPS，必须 none（Secure 由 HTTPS 保证）
+AUTH_COOKIE_SAME_SITE=none
+# [可选] 会话有效期（天）
+AUTH_SESSION_DAYS=30
+# [可选] 验证码有效期（秒）
+AUTH_CODE_TTL_SECONDS=300
+# [可选] 验证码重发间隔（秒）
+AUTH_CODE_RESEND_SECONDS=60
+# [可选] 验证码最大尝试次数
+AUTH_CODE_MAX_ATTEMPTS=5
+# [可选] 单 IP 每小时最大验证码次数
+AUTH_MAX_CODES_PER_IP_HOUR=20
+
+# ---- 邮箱验证码（[可选]，默认 console 仅打印日志）----
+MAIL_TRANSPORT=console
+# 以下为 smtp 模式时填写（SMTP_PASS [敏感] 控制台注入）
+SMTP_HOST=smtp.qq.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=<你的QQ号@qq.com>
+SMTP_PASS=<QQ邮箱SMTP授权码，[敏感]>
+MAIL_FROM="云帆志愿 <你的QQ号@qq.com>"
+
+# ---- 短信验证码（[可选]，默认 console 仅打印日志）----
+SMS_TRANSPORT=console
+SMS_PROVIDER=aliyun
+SMS_ACCESS_KEY_ID=
+SMS_ACCESS_KEY_SECRET=
+SMS_SIGN_NAME=
+SMS_TEMPLATE_CODE=
+
+# ---- 日志 ----
+LOG_LEVEL=info
+
+# ------------------------------------------------------------
+# 注：当前实现使用「服务端会话 + Cookie」鉴权，依赖 AUTH_SESSION_SECRET /
+# AUTH_CODE_PEPPER，不依赖 JWT_* 变量；如后续接入 JWT 鉴权可在此补充。
+# ------------------------------------------------------------
