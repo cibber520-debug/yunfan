@@ -30,6 +30,7 @@ ENV HOST=0.0.0.0
 ENV PORT=3001
 EXPOSE 3001
 
-# 4) 启动：用 tsx 运行 TS 入口（等效 npm start）
+# 4) 启动：先初始化数据库（建表 + 种子），再启动服务。
+#    入口脚本 docker-start.sh：schema→seed→server，初始化失败亦不阻断服务启动。
 #    云托管「监听端口」须设为 3001，健康检查 GET /api/v1/health
-CMD ["npx", "tsx", "src/index.ts"]
+CMD ["sh", "scripts/docker-start.sh"]

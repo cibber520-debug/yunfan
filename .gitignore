@@ -25,3 +25,6 @@ logs/
 
 # ===== 本地 agent 数据（不入库）=====
 .workbuddy-ai/
+
+# ===== 含真实密钥的部署参考文件（绝不入库，避免泄露 PG 密码）=====
+deploy/backend-env.cloudbase.md
