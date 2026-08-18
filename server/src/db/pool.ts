@@ -14,6 +14,8 @@ export const pool = new pg.Pool({
   password: config.db.password,
   database: config.db.database,
   max: config.db.max,
+  // 连接超时 8s：DB 网络不通时快速报错，而非长时间挂起（便于排障与前端及时失败）
+  connectionTimeoutMillis: 8000,
 });
 
 pool.on('error', (err) => {
