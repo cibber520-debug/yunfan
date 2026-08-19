@@ -12,16 +12,22 @@ cd "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/.."
 
 ENV_ID="cibber-test-d4g5zpfdc7f0223c6"
 
+# 固定使用已验证的 CloudBase CLI 版本，避免依赖全局安装或 npx 的可执行文件解析。
+# Bash 函数兼容 macOS 自带 Bash 3.2。
+tcb() {
+  npm exec --yes --package=@cloudbase/cli@3.7.3 -- tcb "$@"
+}
+
 if [ ! -d dist ]; then
   echo "❌ 找不到 dist/，请先构建前端（npm run build）"
   exit 1
 fi
 
 echo "==> 检查 tcb 登录状态（首次会打开浏览器授权）"
-npx -y @cloudbase/cli login || true
+tcb login
 
 echo "==> 上传 dist/ 到静态网站托管 (env=$ENV_ID)"
-npx -y @cloudbase/cli hosting deploy dist -e "$ENV_ID"
+tcb hosting deploy ./dist -e "$ENV_ID" --concurrency 5 --retry-count 3
 
 echo "✅ 前端已上传"
 echo "   访问：https://$ENV_ID-1254041428.tcloudbaseapp.com"
