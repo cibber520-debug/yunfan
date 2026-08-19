@@ -2,115 +2,146 @@ import { pool } from '../src/db/pool';
 import referenceDataJson from '../src/data/reference-data.json';
 import rankCatalogJson from '../src/data/rank-lookup.json';
 import recommendationCatalogJson from '../src/data/recommendations.json';
+import type { PoolClient } from 'pg';
 import type { ReferenceDataResponse, RankCatalog, RecommendationCatalog } from '../src/contracts';
 
-/**
- * 将 jsonb 参数序列化为 JSON 文本。
- * 注意：pg 驱动对 jsonb 参数默认按 Postgres 数组字面量编码（如 {"双一流", ...}），
- * 直接把 JS 数组/对象传入会因语法不符报 22P02；显式 JSON.stringify 后传入 JSON 字符串即可。
- */
-function j(value: unknown): string {
+const SEED_LOCK_KEY = 2_406_081_802;
+
+/** Serialize a value explicitly for jsonb parameters. */
+function json(value: unknown): string {
   return JSON.stringify(value ?? null);
 }
 
-/**
- * 阶段二：把写死测试数据写入 PostgreSQL，并置为 active 数据版本。
- * 运行方式（需先建库并执行 db/schema.sql）：
- *   npm run db:seed
- * 该脚本可重复执行：先清空再写入，保证幂等。
- */
-async function main(): Promise<void> {
-  const ref = referenceDataJson as unknown as ReferenceDataResponse;
-  const rank = rankCatalogJson as unknown as RankCatalog;
-  const rec = recommendationCatalogJson as unknown as RecommendationCatalog;
+function describeError(error: unknown): { message: string; code?: string } {
+  if (error instanceof Error) {
+    const code = (error as Error & { code?: unknown }).code;
+    return { message: error.message, ...(typeof code === 'string' ? { code } : {}) };
+  }
+  return { message: String(error) };
+}
 
-  await pool.query(
-    'TRUNCATE TABLE candidate, score_segment, option_item, reference_region, reference_major, province_rule, data_version RESTART IDENTITY CASCADE',
+async function needsSeed(client: PoolClient, version: string): Promise<boolean> {
+  if (process.env.PG_SEED_FORCE === 'true') return true;
+  const result = await client.query<{ version_label: string }>(
+    `SELECT version_label
+       FROM data_version
+      WHERE active = true
+      ORDER BY updated_at DESC
+      LIMIT 1`,
   );
+  const activeVersion = result.rows[0]?.version_label;
+  if (activeVersion === version) {
+    console.log(`[云帆][seed] 活动数据版本 ${version} 已存在，跳过重复种子写入`);
+    return false;
+  }
+  if (activeVersion !== undefined) {
+    console.log(`[云帆][seed] 活动数据版本 ${activeVersion} 与目标版本 ${version} 不同，将更新种子数据`);
+  }
+  return true;
+}
 
-  const dv = await pool.query<{ id: number }>(
+async function seed(client: PoolClient): Promise<void> {
+  const referenceData = referenceDataJson as unknown as ReferenceDataResponse;
+  const rankCatalog = rankCatalogJson as unknown as RankCatalog;
+  const recommendationCatalog = recommendationCatalogJson as unknown as RecommendationCatalog;
+  if (!(await needsSeed(client, referenceData.version))) return;
+
+  await client.query('TRUNCATE TABLE candidate, score_segment, option_item, reference_region, reference_major, province_rule, data_version RESTART IDENTITY CASCADE');
+
+  const versionResult = await client.query<{ id: number }>(
     `INSERT INTO data_version (version_label, updated_at, disclaimer, active, snapshot_hash, notes)
      VALUES ($1, $2, $3, true, $4, $5) RETURNING id`,
-    [ref.version, ref.updatedAt, rec.disclaimer, `seed-${ref.version}`, '写死演示数据'],
+    [referenceData.version, referenceData.updatedAt, recommendationCatalog.disclaimer, `seed-${referenceData.version}`, '写死演示数据'],
   );
-  const versionId = dv.rows[0].id;
+  const versionId = versionResult.rows[0]?.id;
+  if (versionId === undefined) throw new Error('无法创建数据版本');
 
-  for (const p of ref.provinces) {
-    await pool.query(
+  for (const province of referenceData.provinces) {
+    await client.query(
       `INSERT INTO province_rule
         (code, name, exam_type, max_score, ready, rule_summary, subject_rule, max_bonus_score, data_version_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-      [p.code, p.name, p.examType, p.maxScore, p.ready, p.ruleSummary, j(p.subjectRule), p.maxBonusScore, versionId],
+      [province.code, province.name, province.examType, province.maxScore, province.ready, province.ruleSummary, json(province.subjectRule), province.maxBonusScore, versionId],
     );
   }
 
-  const optionEntries = Object.entries(ref.optionCatalog) as Array<[string, Array<{ code: string; label: string }>]>;
+  const optionEntries = Object.entries(referenceData.optionCatalog) as Array<[string, Array<{ code: string; label: string }>]>;
   for (const [catalog, items] of optionEntries) {
-    for (let i = 0; i < items.length; i++) {
-      await pool.query(
+    for (const [index, item] of items.entries()) {
+      await client.query(
         'INSERT INTO option_item (catalog, code, label, sort_order) VALUES ($1,$2,$3,$4)',
-        [catalog, items[i].code, items[i].label, i],
+        [catalog, item.code, item.label, index],
       );
     }
   }
 
-  for (const name of ref.regions) {
-    await pool.query('INSERT INTO reference_region (name) VALUES ($1)', [name]);
+  for (const name of referenceData.regions) {
+    await client.query('INSERT INTO reference_region (name) VALUES ($1)', [name]);
   }
-  for (const name of ref.majors) {
-    await pool.query('INSERT INTO reference_major (name) VALUES ($1)', [name]);
+  for (const name of referenceData.majors) {
+    await client.query('INSERT INTO reference_major (name) VALUES ($1)', [name]);
   }
-
-  for (const s of rank.segments) {
-    await pool.query(
+  for (const segment of rankCatalog.segments) {
+    await client.query(
       `INSERT INTO score_segment
         (province, exam_type, score, rank, lower, upper, data_version_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-      [s.province, s.examType, s.score, s.rank, s.lower, s.upper, versionId],
+      [segment.province, segment.examType, segment.score, segment.rank, segment.lower, segment.upper, versionId],
     );
   }
-
-  for (const c of rec.candidates) {
-    await pool.query(
+  for (const candidate of recommendationCatalog.candidates) {
+    await client.query(
       `INSERT INTO candidate
         (id, province, exam_type, school_name, major_name, group_name, tier, probability, confidence,
          last_rank, school_tier, ownership, region, tags, reason, predicted, required_subjects, data_version_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
       [
-        c.id,
-        c.province,
-        c.examType,
-        c.schoolName,
-        c.majorName,
-        c.groupName,
-        c.tier,
-        c.probability,
-        c.confidence,
-        c.lastRank,
-        c.schoolTier,
-        c.ownership,
-        c.region,
-        j(c.tags),
-        c.reason,
-        c.predicted,
-        j(c.requiredSubjects),
+        candidate.id,
+        candidate.province,
+        candidate.examType,
+        candidate.schoolName,
+        candidate.majorName,
+        candidate.groupName,
+        candidate.tier,
+        candidate.probability,
+        candidate.confidence,
+        candidate.lastRank,
+        candidate.schoolTier,
+        candidate.ownership,
+        candidate.region,
+        json(candidate.tags),
+        candidate.reason,
+        candidate.predicted,
+        json(candidate.requiredSubjects),
         versionId,
       ],
     );
   }
-
-  console.log(
-    `数据库已写入：版本 ${ref.version}，省份 ${ref.provinces.length}，位次段 ${rank.segments.length}，候选 ${rec.candidates.length}`,
-  );
-  await pool.end();
+  console.log(`[云帆][seed] 已写入版本 ${referenceData.version}：省份 ${referenceData.provinces.length}，位次段 ${rankCatalog.segments.length}，候选 ${recommendationCatalog.candidates.length}`);
 }
 
-main().catch(async (err) => {
-  console.error('seed 失败：', err);
+async function main(): Promise<void> {
+  const client = await pool.connect();
   try {
+    await client.query('BEGIN');
+    await client.query('SELECT pg_advisory_xact_lock($1)', [SEED_LOCK_KEY]);
+    await seed(client);
+    await client.query('COMMIT');
+    console.log('[云帆][seed] 种子事务已提交 ✓');
+  } catch (error) {
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      // Preserve the original error below.
+    }
+    throw error;
+  } finally {
+    client.release();
     await pool.end();
-  } catch {
-    /* ignore */
   }
+}
+
+main().catch((error) => {
+  console.error('[云帆][seed] 种子写入失败', describeError(error));
   process.exit(1);
 });
