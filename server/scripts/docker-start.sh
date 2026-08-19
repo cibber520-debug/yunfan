@@ -1,19 +1,23 @@
 #!/bin/sh
-# 云帆志愿后端启动入口
-# 关键改动：服务先启动（让 CloudBase Run 健康检查秒过），
-#           数据库初始化（schema + seed）放到后台异步跑。
-# 这样即使 PG 暂时连不上/初始化慢，pod 也能进入 Running 状态，
-# 业务接口在初始化完成前会返回 DB 错误，但服务不会被反复重启。
-set -e
+# 云帆志愿后端启动入口。
+# 服务始终先监听健康检查；PostgreSQL 初始化只在 postgres 数据源时异步执行。
+set -eu
 
-echo "[云帆] 后台启动数据库初始化（schema + seed）..."
-(
-  echo "[云帆][init] 应用数据库结构..."
-  npx tsx scripts/db-apply-schema.ts || echo "[云帆][init] 数据库结构应用失败，详见上方日志"
-  echo "[云帆][init] 写入种子数据..."
-  npx tsx scripts/seed-db.ts || echo "[云帆][init] 种子数据写入失败，详见上方日志"
-  echo "[云帆][init] 数据库初始化流程结束"
-) &
+data_source="$(printf '%s' "${DATA_SOURCE:-seed}" | tr '[:upper:]' '[:lower:]')"
+if [ "$data_source" = "postgres" ]; then
+  echo "[云帆][init] 后台启动 PostgreSQL 初始化（schema + seed）..."
+  (
+    if npx tsx scripts/db-apply-schema.ts; then
+      echo "[云帆][init] 数据库结构已就绪，开始写入种子数据..."
+      npx tsx scripts/seed-db.ts
+      echo "[云帆][init] PostgreSQL 初始化完成"
+    else
+      echo "[云帆][init] 数据库结构初始化失败，已跳过种子写入；业务请求将返回受控数据库错误" >&2
+    fi
+  ) &
+else
+  echo "[云帆][init] DATA_SOURCE=${DATA_SOURCE:-seed}，跳过 PostgreSQL 初始化"
+fi
 
 echo "[云帆] 启动后端服务..."
 exec npx tsx src/index.ts
